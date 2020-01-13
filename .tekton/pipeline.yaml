@@ -1,0 +1,36 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Pipeline
+metadata:
+  name: pipeline
+spec:
+  params:
+    - name: pipeline-pvc
+      description: the pipeline pvc name
+    - name: repository
+      description: the git repo
+    - name: revision
+      description: the branch for the git repo
+    - name: apikey
+      description: the ibmcloud api key
+    - name: toolchainRegion
+      description: the ibmcloud region containing the toolchain referencing the repository
+      default: us-south
+    - name: toolchainId
+      description: The IBM Cloud Kubernetes cluster region
+  tasks:
+    - name: pipeline-clone-task
+      taskRef:
+        name: clone-repo-task
+      params:
+        - name: task-pvc
+          value: $(params.pipeline-pvc)
+        - name: repository
+          value: $(params.repository)
+        - name: revision
+          value: $(params.revision)
+        - name: apikey
+          value: $(params.apikey)
+        - name: toolchainRegion
+          value: $(params.toolchainRegion)
+        - name: toolchainId
+          value: $(params.toolchainId)
