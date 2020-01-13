@@ -44,13 +44,13 @@ spec:
       command: ["/bin/bash", "-c"]
       args:
         - | 
-          set -e -o pipefail;
+          #set -e -o pipefail;
           echo "Fetching token for $REPOSITORY";
           ibmcloud config --check-version false;
           ibmcloud login -a $API -r $REGION --apikey $API_KEY;
           TOKEN=$(ibmcloud iam oauth-tokens --output JSON | jq -r '.iam_token');
           echo "curl ${API}/devops/toolchains/${TOOLCHAIN_ID}?env_id=ibm:yp:${REGION}"
-          curl -X GET -H "Accept: application/json" -H "Authorization: $TOKEN" "${API}/devops/toolchains/${TOOLCHAIN_ID}?env_id=ibm:yp:${REGION}" -o _toolchain.json;
+          curl -is -X GET -o _toolchain.json -H "Accept: application/json" -H "Authorization: $TOKEN" "${API}/devops/toolchains/${TOOLCHAIN_ID}?env_id=ibm:yp:${REGION}";
           if [[ "$REPOSITORY" != *.git ]]; then
             echo "Adding .git suffix to Repository URL"
             REPOSITORY="${REPOSITORY}.git"
