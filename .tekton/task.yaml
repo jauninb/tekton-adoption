@@ -54,6 +54,8 @@ spec:
             echo "Adding .git suffix to Repository URL"
             REPOSITORY="${REPOSITORY}.git"
           fi;
+          ls -l;
+          cat _toolchain.json;
           GIT_TOKEN_URL=$(cat _toolchain.json | jq -r --arg git_repo "$REPOSITORY" '.services[] | select (.parameters.repo_url==$git_repo) | .parameters.token_url');
           GIT_SERVICE_INSTANCE_ID=$(cat _toolchain.json | jq -r --arg git_repo "$REPOSITORY" '.services[] | select (.parameters.repo_url==$git_repo) | .instance_id');
           GIT_SERVICE_TYPE=$(cat _toolchain.json | jq -r --arg git_repo "$REPOSITORY" '.services[] | select (.parameters.repo_url==$git_repo) | .service_id');
