@@ -41,7 +41,7 @@ spec:
           value: $(inputs.params.toolchainId)
         - name: REPOSITORY
           value: $(inputs.params.repository)
-      command: ["/bin/sh", "-c"]
+      command: ["/bin/bash", "-c"]
       args:
         - | 
           set -e -o pipefail;
@@ -53,7 +53,7 @@ spec:
           if [[ "$REPOSITORY" != *.git ]]; then
             echo "Adding .git suffix to Repository URL"
             REPOSITORY="${REPOSITORY}.git"
-          fi
+          fi;
           GIT_TOKEN_URL=$(cat _toolchain.json | jq -r --arg git_repo "$REPOSITORY" '.services[] | select (.parameters.repo_url==$git_repo) | .parameters.token_url');
           GIT_SERVICE_INSTANCE_ID=$(cat _toolchain.json | jq -r --arg git_repo "$REPOSITORY" '.services[] | select (.parameters.repo_url==$git_repo) | .instance_id');
           GIT_SERVICE_TYPE=$(cat _toolchain.json | jq -r --arg git_repo "$REPOSITORY" '.services[] | select (.parameters.repo_url==$git_repo) | .service_id');
@@ -70,7 +70,7 @@ spec:
             GIT_AUTH_USER="x-token-auth"
           else
             GIT_AUTH_USER="x-token-auth"
-          fi
+          fi;
           echo "GIT_AUTH_USER=$GIT_AUTH_USER" > next-step-env.properties;
           echo "GIT_TOKEN=$GIT_TOKEN" >> next-step-env.properties;
       volumeMounts:
