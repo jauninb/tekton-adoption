@@ -45,7 +45,7 @@ spec:
       args:
         - | 
           set -e -o pipefail;
-          echo "Fetching token for $REPOSITORY";
+          echo "Fetching token for $REPOSITORY from toolchain information";
           ibmcloud config --check-version false;
           ibmcloud login -a $API -r $REGION --apikey $API_KEY;
           TOKEN=$(ibmcloud iam oauth-tokens --output JSON | jq -r '.iam_token');
