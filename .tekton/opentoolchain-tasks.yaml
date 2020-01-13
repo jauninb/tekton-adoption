@@ -124,6 +124,8 @@ spec:
           echo "GIT_COMMIT=$GIT_COMMIT" >> $PROPERTIES_FILE
           echo "GIT_PREVIOUS_COMMIT=$GIT_PREVIOUS_COMMIT" >> $PROPERTIES_FILE
 
+          cat $PROPERTIES_FILE
+
       volumeMounts:
         - mountPath: /artifacts
           name: task-volume
