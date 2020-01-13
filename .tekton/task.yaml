@@ -97,7 +97,8 @@ spec:
       command: ["/bin/sh", "-c"]
       args:
         - | 
-          set -e -o pipefail;
+          # set -e -o pipefail;
+          cat /steps/next-step-env.properties;
           source /steps/next-step-env.properties;
           echo "Cloning $REPOSITORY";
           GIT_URL=$REPOSITORY;
