@@ -49,19 +49,19 @@ spec:
           ibmcloud config --check-version false;
           ibmcloud login -a $API -r $REGION --apikey $API_KEY;
           TOKEN=$(ibmcloud iam oauth-tokens --output JSON | jq -r '.iam_token');
-          echo "curl ${API}/devops/toolchains/${TOOLCHAIN_ID}?env_id=ibm:yp:${REGION}"
-          curl -is -X GET -o _toolchain.json -H "Accept: application/json" -H "Authorization: $TOKEN" "${API}/devops/toolchains/${TOOLCHAIN_ID}?env_id=ibm:yp:${REGION}";
+          echo "TOKEN=$TOKEN";
+          echo "curl ${API}/devops/toolchains/${TOOLCHAIN_ID}?env_id=ibm:yp:${REGION}";
+          curl -s -X GET -o _toolchain.json -H "Accept: application/json" -H "Authorization: $TOKEN" "${API}/devops/toolchains/${TOOLCHAIN_ID}?env_id=ibm:yp:${REGION}";
+          if jq '.services' _toolchain.json > /dev/null 2>&1; then
+            echo "Found toolchain with id $TOOLCHAIN_ID in region $REGION"
+          else
+            echo "Toolchain with id $TOOLCHAIN_ID in region $REGION not found"
+            exit 1
+          fi
           if [[ "$REPOSITORY" != *.git ]]; then
             echo "Adding .git suffix to Repository URL"
             REPOSITORY="${REPOSITORY}.git"
           fi;
-          if jq '.services' _toolchain.json; then
-            echo "Found toolchain with id $TOOLCHAIN_ID in region $REGION"
-          else
-            echo "Toolchain with id $TOOLCHAIN_ID in region $REGION not found"
-            cat _toolchain.json
-            exit 1
-          fi
           GIT_TOKEN_URL=$(cat _toolchain.json | jq -r --arg git_repo "$REPOSITORY" '.services[] | select (.parameters.repo_url==$git_repo) | .parameters.token_url');
           GIT_SERVICE_INSTANCE_ID=$(cat _toolchain.json | jq -r --arg git_repo "$REPOSITORY" '.services[] | select (.parameters.repo_url==$git_repo) | .instance_id');
           GIT_SERVICE_TYPE=$(cat _toolchain.json | jq -r --arg git_repo "$REPOSITORY" '.services[] | select (.parameters.repo_url==$git_repo) | .service_id');
