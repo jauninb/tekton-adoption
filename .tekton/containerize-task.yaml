@@ -1,0 +1,52 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: containerize-task
+spec:
+  inputs:
+    params:
+      - name: task-pvc
+        description: the output pvc - this is where the clone repository will be stored
+      - name: apikey
+        description: the ibmcloud api key
+      - name: api
+        description: the ibmcloud api url
+        default: https://cloud.ibm.com
+      - name: toolchainRegion
+        description: the ibmcloud region hosting the toolchain
+        default: us-south
+      - name: toolchainId
+        description: the ibmcloud region hosting the toolchain
+      - name: propertiesFile
+        description: file containing properties out of clone task
+        default: build.properties
+  steps:
+    - name: build-docker-image
+      image: registry.ng.bluemix.net/otc-images/otc-k8s-build:latest
+      env:
+        - name: HOME
+          value: "/root"
+        - name: API_KEY
+          value: $(inputs.params.apikey)
+        - name: API
+          value: $(inputs.params.api)
+        - name: REGION
+          value: $(inputs.params.toolchainRegion)
+        - name: TOOLCHAIN_ID
+          value: $(inputs.params.toolchainId)
+      command: ["/bin/bash", "-c"]
+      args:
+        - | 
+          set -e -o pipefail;
+          ls -l;
+      volumeMounts:
+        - mountPath: /artifacts
+          name: task-volume
+        - mountPath: /steps
+          name: steps-volume
+  volumes:
+    - name: steps-volume
+      emptyDir: {}
+    - name: task-volume
+      persistentVolumeClaim:
+        claimName: $(inputs.params.task-pvc)
