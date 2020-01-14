@@ -18,7 +18,9 @@ spec:
     - name: containerRegistryToken
       description: Token to connect to IBM Container Registry to pull image
     - name: dockerconfigjson
-      description: content of .dockerconfigjson for a secret of type kubernetes.io/dockerconfigjson
+      description: | 
+        content of .dockerconfigjson for a secret of type kubernetes.io/dockerconfigjson.
+        This can be created using "kubectl create secret --dry-run=true -o yaml docker-registry tekton-adoption --docker-server=${REGISTRY_URL} --docker-password=${TOKEN} --docker-username=iamapikey --docker-email=a@b.com"
   resourcetemplates:
     # k8s resources to be able to pull docker image from a specific container registry
     - apiVersion: v1
