@@ -34,7 +34,7 @@ spec:
           value: $(params.toolchainRegion)
         - name: toolchainId
           value: $(params.toolchainId)
-    - name: containerize-task
+    - name: pipeline-containerize-task
       task-ref:
         name: containerize-task
       params:
