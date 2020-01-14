@@ -22,7 +22,6 @@ spec:
         default: build.properties
   steps:
     - name: build-docker-image
-      #image: registry.ng.bluemix.net/otc-images/otc-k8s-build:latest
       image: ibmcom/pipeline-base-image
       env:
         - name: HOME
@@ -37,8 +36,7 @@ spec:
           value: $(inputs.params.toolchainId)
       command: ["/bin/bash", "-c"]
       args:
-        - | 
-          set -e -o pipefail;
+        - set -e -o pipefail;
           ls -l;
       volumeMounts:
         - mountPath: /artifacts
