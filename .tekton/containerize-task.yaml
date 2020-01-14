@@ -22,7 +22,8 @@ spec:
         default: build.properties
   steps:
     - name: build-docker-image
-      image: registry.ng.bluemix.net/otc-images/otc-k8s-build:latest
+      #image: registry.ng.bluemix.net/otc-images/otc-k8s-build:latest
+      image: ibmcom/pipeline-base-image:latest
       env:
         - name: HOME
           value: "/root"
