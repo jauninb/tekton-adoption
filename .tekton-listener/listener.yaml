@@ -16,22 +16,34 @@ spec:
     - name: toolchainId
       description: The IBM Cloud Kubernetes cluster region
     - name: containerRegistryToken
-      description: Token to connect to IBM Container Registry to pull image 
+      description: Token to connect to IBM Container Registry to pull image
+    - name: dockerconfigjson
+      description: content of .dockerconfigjson for a secret of type kubernetes.io/dockerconfigjson
   resourcetemplates:
     # k8s resources to be able to pull docker image from a specific container registry
     - apiVersion: v1
       kind: Secret
       metadata:
-        name: private-registry-token
+        name: private-registry-secret
       type: kubernetes.io/dockerconfigjson
       data:
         .dockerconfigjson: $(params.dockerconfigjson)
+    - apiVersion: v1
+      kind: Secret
+      metadata:
+        name: private-registry-token
+        annotations:
+          tekton.dev/docker-0: https://registry.ng.bluemix.net
+      type: kubernetes.io/basic-auth
+      stringData:
+        username: iamapikey
+        password: $(params.containerRegistryToken)        
     - apiVersion: v1
       kind: ServiceAccount
       metadata:
         name: containerize-build-sa
       imagePullSecrets:
-        - name: private-registry-token
+        - name: private-registry-secret
     - apiVersion: tekton.dev/v1alpha1
       kind: PipelineRun
       metadata:
