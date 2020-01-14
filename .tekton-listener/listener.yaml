@@ -28,22 +28,22 @@ spec:
       type: kubernetes.io/dockerconfigjson
       data:
         .dockerconfigjson: $(params.dockerconfigjson)
-    - apiVersion: v1
-      kind: Secret
-      metadata:
-        name: private-registry-token
-        annotations:
-          tekton.dev/docker-0: https://registry.ng.bluemix.net
-      type: kubernetes.io/basic-auth
-      stringData:
-        username: iamapikey
-        password: $(params.containerRegistryToken)        
+    # - apiVersion: v1
+    #   kind: Secret
+    #   metadata:
+    #     name: private-registry-token
+    #     annotations:
+    #       tekton.dev/docker-0: https://registry.ng.bluemix.net
+    #   type: kubernetes.io/basic-auth
+    #   stringData:
+    #     username: iamapikey
+    #     password: $(params.containerRegistryToken)        
     - apiVersion: v1
       kind: ServiceAccount
       metadata:
         name: containerize-build-sa
       imagePullSecrets:
-        - name: private-registry-token
+        - name: private-registry-secret
     - apiVersion: tekton.dev/v1alpha1
       kind: PipelineRun
       metadata:
