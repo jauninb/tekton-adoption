@@ -30,7 +30,7 @@ spec:
       kind: ServiceAccount
       metadata:
         name: containerize-build-sa
-      secrets:
+      imagePullSecrets:
         - name: private-registry-token
     - apiVersion: tekton.dev/v1alpha1
       kind: PipelineRun
