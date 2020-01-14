@@ -29,7 +29,7 @@ spec:
     - apiVersion: v1
       kind: ServiceAccount
       metadata:
-        name: containerize-build
+        name: containerize-build-sa
       secrets:
         - name: private-registry-token
     - apiVersion: tekton.dev/v1alpha1
@@ -41,7 +41,7 @@ spec:
           name: pipeline
         serviceAccounts:
         - taskName: pipeline-containerize-task
-          serviceAccount: containerize-build
+          serviceAccount: containerize-build-sa
         params:
         - name: pipeline-pvc
           value: pipelinerun-$(uid)-pvc
