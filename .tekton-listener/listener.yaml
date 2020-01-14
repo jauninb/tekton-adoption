@@ -24,7 +24,7 @@ spec:
       metadata:
         name: private-registry-token
         annotations:
-          tekton.dev/registry-0: registry.ng.bluemix.net
+          tekton.dev/docker-0: registry.ng.bluemix.net
       type: kubernetes.io/basic-auth
       stringData:
         username: iamapikey
