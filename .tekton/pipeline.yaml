@@ -18,31 +18,31 @@ spec:
     - name: toolchainId
       description: The IBM Cloud Kubernetes cluster region
   tasks:
-    # - name: pipeline-clone-task
-    #   taskRef:
-    #     name: clone-repo-task
-    #   params:
-    #     - name: task-pvc
-    #       value: $(params.pipeline-pvc)
-    #     - name: repository
-    #       value: $(params.repository)
-    #     - name: revision
-    #       value: $(params.revision)
-    #     - name: apikey
-    #       value: $(params.apikey)
-    #     - name: toolchainRegion
-    #       value: $(params.toolchainRegion)
-    #     - name: toolchainId
-    #       value: $(params.toolchainId)
-    - name: pipeline-containerize-task
-      task-ref:
-        name: containerize-task
+    - name: pipeline-clone-task
+      taskRef:
+        name: clone-repo-task
       params:
         - name: task-pvc
           value: $(params.pipeline-pvc)
+        - name: repository
+          value: $(params.repository)
+        - name: revision
+          value: $(params.revision)
         - name: apikey
           value: $(params.apikey)
         - name: toolchainRegion
           value: $(params.toolchainRegion)
         - name: toolchainId
           value: $(params.toolchainId)
+    # - name: pipeline-containerize-task
+    #   task-ref:
+    #     name: containerize-task
+    #   params:
+    #     - name: task-pvc
+    #       value: $(params.pipeline-pvc)
+    #     - name: apikey
+    #       value: $(params.apikey)
+    #     - name: toolchainRegion
+    #       value: $(params.toolchainRegion)
+    #     - name: toolchainId
+    #       value: $(params.toolchainId)
