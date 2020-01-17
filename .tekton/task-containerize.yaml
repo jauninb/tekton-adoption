@@ -37,9 +37,11 @@ spec:
           value: $(inputs.params.toolchainId)
       command: ["/bin/bash", "-c"]
       args:
-        - set -e -o pipefail;
-          ls -l;
-          sleep 180s;
+        - | 
+          set -e -o pipefail
+          ls -l
+          env | sort
+          #sleep 180s
       volumeMounts:
         - mountPath: /artifacts
           name: task-volume
