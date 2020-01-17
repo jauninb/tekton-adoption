@@ -43,7 +43,7 @@ spec:
           value: $(inputs.params.repository)
       command: ["/bin/bash", "-c"]
       args:
-        - | 
+        - |
           set -e -o pipefail
           echo "Fetching token for $REPOSITORY"
           ibmcloud config --check-version false
@@ -96,7 +96,7 @@ spec:
           value: $(inputs.params.propertiesFile)
       command: ["/bin/sh", "-c"]
       args:
-        - | 
+        - |
           source /steps/next-step-env.properties
           echo "Cloning $REPOSITORY"
           GIT_URL=$REPOSITORY
