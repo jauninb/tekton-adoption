@@ -28,7 +28,7 @@ spec:
   stepTemplate:
     envFrom:
       - configMapRef:
-        name: cd-config
+          name: cd-config
   steps:
     - name: fetch-git-token
       image: ibmcom/pipeline-base-image

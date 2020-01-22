@@ -23,7 +23,7 @@ spec:
   stepTemplate:
     envFrom:
       - configMapRef:
-        name: cd-config
+          name: cd-config
   steps:
     - name: build-docker-image
       image: registry.ng.bluemix.net/otc-images/otc-k8s-build:latest
