@@ -10,13 +10,13 @@ spec:
       description: the git repo
     - name: revision
       description: the branch for the git repo
-    - name: apikey
-      description: the ibmcloud api key
-    - name: toolchainRegion
-      description: the ibmcloud region containing the toolchain referencing the repository
-      default: us-south
-    - name: toolchainId
-      description: The IBM Cloud Kubernetes cluster region
+    # - name: apikey
+    #   description: the ibmcloud api key
+    # - name: toolchainRegion
+    #   description: the ibmcloud region containing the toolchain referencing the repository
+    #   default: us-south
+    # - name: toolchainId
+    #   description: The IBM Cloud Kubernetes cluster region
   tasks:
     - name: pipeline-clone-task
       taskRef:
@@ -28,12 +28,12 @@ spec:
           value: $(params.repository)
         - name: revision
           value: $(params.revision)
-        - name: apikey
-          value: $(params.apikey)
-        - name: toolchainRegion
-          value: $(params.toolchainRegion)
-        - name: toolchainId
-          value: $(params.toolchainId)
+        # - name: apikey
+        #   value: $(params.apikey)
+        # - name: toolchainRegion
+        #   value: $(params.toolchainRegion)
+        # - name: toolchainId
+        #   value: $(params.toolchainId)
     - name: pipeline-containerize-task
       runAfter: [pipeline-clone-task]
       taskRef:
@@ -41,9 +41,9 @@ spec:
       params:
         - name: task-pvc
           value: $(params.pipeline-pvc)
-        - name: apikey
-          value: $(params.apikey)
-        - name: toolchainRegion
-          value: $(params.toolchainRegion)
-        - name: toolchainId
-          value: $(params.toolchainId)
+        # - name: apikey
+        #   value: $(params.apikey)
+        # - name: toolchainRegion
+        #   value: $(params.toolchainRegion)
+        # - name: toolchainId
+        #   value: $(params.toolchainId)
