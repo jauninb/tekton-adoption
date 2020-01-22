@@ -7,19 +7,23 @@ spec:
     params:
       - name: task-pvc
         description: the output pvc - this is where the clone repository will be stored
-      - name: apikey
-        description: the ibmcloud api key
-      - name: api
-        description: the ibmcloud api url
-        default: https://cloud.ibm.com
-      - name: toolchainRegion
-        description: the ibmcloud region hosting the toolchain
-        default: us-south
-      - name: toolchainId
-        description: the ibmcloud region hosting the toolchain
+      # - name: apikey
+      #   description: the ibmcloud api key
+      # - name: api
+      #   description: the ibmcloud api url
+      #   default: https://cloud.ibm.com
+      # - name: toolchainRegion
+      #   description: the ibmcloud region hosting the toolchain
+      #   default: us-south
+      # - name: toolchainId
+      #   description: the ibmcloud region hosting the toolchain
       - name: propertiesFile
         description: file containing properties out of clone task
         default: build.properties
+  stepTemplate:
+    envFrom:
+      - configMapRef:
+        name: cd-config
   steps:
     - name: build-docker-image
       image: registry.ng.bluemix.net/otc-images/otc-k8s-build:latest
@@ -27,14 +31,14 @@ spec:
       env:
         - name: HOME
           value: "/root"
-        - name: API_KEY
-          value: $(inputs.params.apikey)
-        - name: API
-          value: $(inputs.params.api)
-        - name: REGION
-          value: $(inputs.params.toolchainRegion)
-        - name: TOOLCHAIN_ID
-          value: $(inputs.params.toolchainId)
+        # - name: API_KEY
+        #   value: $(inputs.params.apikey)
+        # - name: API
+        #   value: $(inputs.params.api)
+        # - name: REGION
+        #   value: $(inputs.params.toolchainRegion)
+        # - name: TOOLCHAIN_ID
+        #   value: $(inputs.params.toolchainId)
       command: ["/bin/bash", "-c"]
       args:
         - | 

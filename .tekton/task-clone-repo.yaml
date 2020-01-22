@@ -12,33 +12,37 @@ spec:
       - name: revision
         description: the git revision
         default: master
-      - name: apikey
-        description: the ibmcloud api key
-      - name: api
-        description: the ibmcloud api url
-        default: https://cloud.ibm.com
-      - name: toolchainRegion
-        description: the ibmcloud region hosting the toolchain
-        default: us-south
-      - name: toolchainId
-        description: the id of the toolchain including the tekton pipeline
+      # - name: apikey
+      #   description: the ibmcloud api key
+      # - name: api
+      #   description: the ibmcloud api url
+      #   default: https://cloud.ibm.com
+      # - name: toolchainRegion
+      #   description: the ibmcloud region hosting the toolchain
+      #   default: us-south
+      # - name: toolchainId
+      #   description: the id of the toolchain including the tekton pipeline
       - name: propertiesFile
         description: file containing properties out of clone task
         default: build.properties
+  stepTemplate:
+    envFrom:
+      - configMapRef:
+        name: cd-config
   steps:
     - name: fetch-git-token
       image: ibmcom/pipeline-base-image
       env:
         - name: HOME
           value: "/root"
-        - name: API_KEY
-          value: $(inputs.params.apikey)
-        - name: API
-          value: $(inputs.params.api)
-        - name: REGION
-          value: $(inputs.params.toolchainRegion)
-        - name: TOOLCHAIN_ID
-          value: $(inputs.params.toolchainId)
+        # - name: API_KEY
+        #   value: $(inputs.params.apikey)
+        # - name: API
+        #   value: $(inputs.params.api)
+        # - name: REGION
+        #   value: $(inputs.params.toolchainRegion)
+        # - name: TOOLCHAIN_ID
+        #   value: $(inputs.params.toolchainId)
         - name: REPOSITORY
           value: $(inputs.params.repository)
       command: ["/bin/bash", "-c"]

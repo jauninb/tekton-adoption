@@ -8,6 +8,9 @@ spec:
       description: The git repo
     - name: revision
       description: the branch for the git repo
+    - name: api
+      description: the ibmcloud api
+      default: https://cloud.ibm.com
     - name: apikey
       description: the ibmcloud api key
     - name: toolchainRegion
@@ -22,6 +25,16 @@ spec:
         content of .dockerconfigjson for a secret of type kubernetes.io/dockerconfigjson.
         This can be created using "kubectl create secret --dry-run=true -o yaml docker-registry tekton-adoption --docker-server=${REGISTRY_URL} --docker-password=${TOKEN} --docker-username=iamapikey --docker-email=a@b.com"
   resourcetemplates:
+    # CD context defined as a configmap because it is immutable information
+    - apiVersion: v1
+      kind: ConfigMap
+      metadata:
+        name: cd-config
+      data:
+        API_KEY: $(params.apikey)
+        API: $(params.api)
+        REGION: $(toolchainRegion)
+        TOOLCHAIN_ID: $(params.toolchainId)
     # k8s resources to be able to pull docker image from a specific container registry
     - apiVersion: v1
       kind: Secret
@@ -63,12 +76,12 @@ spec:
           value: $(params.repository)
         - name: revision
           value: $(params.revision)
-        - name: apikey
-          value: $(params.apikey)
-        - name: toolchainRegion
-          value: $(params.toolchainRegion)
-        - name: toolchainId
-          value: $(params.toolchainId)
+        # - name: apikey
+        #   value: $(params.apikey)
+        # - name: toolchainRegion
+        #   value: $(params.toolchainRegion)
+        # - name: toolchainId
+        #   value: $(params.toolchainId)
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: TriggerBinding
