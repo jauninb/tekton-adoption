@@ -31,10 +31,16 @@ spec:
       metadata:
         name: cd-config
       data:
-        API_KEY: $(params.apikey)
         API: $(params.api)
         REGION: $(params.toolchainRegion)
         TOOLCHAIN_ID: $(params.toolchainId)
+    - apiVersion: v1
+      kind: Secret
+      metadata:
+        name: cd-secret
+      type: Opaque
+      stringData:
+        API_KEY: $(params.apikey)
     # k8s resources to be able to pull docker image from a specific container registry
     - apiVersion: v1
       kind: Secret

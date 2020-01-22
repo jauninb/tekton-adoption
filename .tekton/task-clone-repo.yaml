@@ -29,6 +29,12 @@ spec:
     envFrom:
       - configMapRef:
           name: cd-config
+    env:
+      - name: API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: cd-secret
+            key: API_KEY
   steps:
     - name: fetch-git-token
       image: ibmcom/pipeline-base-image
