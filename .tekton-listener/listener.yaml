@@ -6,7 +6,7 @@ spec:
   params:
     - name: repository
       description: The git repo
-    - name: revision
+    - name: branch
       description: the branch for the git repo
     - name: api
       description: the ibmcloud api
@@ -80,8 +80,8 @@ spec:
           value: pipelinerun-$(uid)-pvc
         - name: repository
           value: $(params.repository)
-        - name: revision
-          value: $(params.revision)
+        - name: branch
+          value: $(params.branch)
         # - name: apikey
         #   value: $(params.apikey)
         # - name: toolchainRegion
@@ -95,7 +95,7 @@ metadata:
   name: trigger-binding-dev
 spec:
   params:
-    - name: revision
+    - name: branch
       value: "master"
 ---
 apiVersion: tekton.dev/v1alpha1
@@ -104,7 +104,7 @@ metadata:
   name: trigger-binding-staging
 spec:
   params:
-    - name: revision
+    - name: branch
       value: "integration"
 ---
 apiVersion: tekton.dev/v1alpha1
