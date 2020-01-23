@@ -78,7 +78,7 @@ spec:
         pipelineRef:
           name: pipeline
         serviceAccounts:
-        - taskName: pipeline-containerize-task
+        - taskName: pipeline-3-containerize-task
           serviceAccount: containerize-build-sa
         params:
         - name: pipeline-pvc
