@@ -12,6 +12,9 @@ spec:
       - name: branch
         description: the git branch
         default: master
+      - name: directoryName
+        description: name of the new directory to clone into. It will default to the "humanish" part of the repository.
+        default: ''
       # - name: apikey
       #   description: the ibmcloud api key
       # - name: api
@@ -102,6 +105,8 @@ spec:
           value: $(inputs.params.repository)
         - name: BRANCH
           value: $(inputs.params.branch)
+        - name: DIRECTORY_NAME
+          value: $(inputs.params.directoryName)
         - name: PROPERTIES_FILE
           value: $(inputs.params.propertiesFile)
       command: ["/bin/sh", "-c"]
@@ -111,8 +116,8 @@ spec:
           echo "Cloning $REPOSITORY"
           GIT_URL=$REPOSITORY
           REPOSITORY=$(echo "$REPOSITORY" | sed -e "s/:\/\//:\/\/$GIT_AUTH_USER:$GIT_TOKEN@/g")
-          git clone -q -b $BRANCH $REPOSITORY /artifacts
           cd /artifacts
+          git clone -q -b $BRANCH $REPOSITORY $DIRECTORY_NAME
           GIT_BRANCH=$(cat .git/HEAD | awk -F/ '{print $3}')
           GIT_COMMIT=$(git show-ref --head | head -n1 | awk '{print $1}')
           echo "GIT_URL=$GIT_URL" > $PROPERTIES_FILE
