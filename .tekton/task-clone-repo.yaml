@@ -13,8 +13,11 @@ spec:
         description: the git branch
         default: master
       - name: directoryName
-        description: name of the new directory to clone into. It will default to the "humanish" part of the repository.
-        default: ''
+        description: |
+          name of the new directory to clone into.
+          Default to . in order to clone at the root of the volume mounted for the pipeline run
+          It will be to the "humanish" part of the repository if this param is set to blank          
+        default: '.'
       # - name: apikey
       #   description: the ibmcloud api key
       # - name: api
