@@ -33,6 +33,7 @@ spec:
         - name: branch
           value: $(params.branch)
     - name: pipeline-2-clone-task
+      runAfter: [pipeline-1-clone-task]
       taskRef:
         name: clone-repo-task
       params:

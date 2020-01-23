@@ -12,6 +12,7 @@ spec:
       description: The second git repo
     - name: branch2
       description: the branch for the second git repo
+      default: master
     - name: api
       description: the ibmcloud api
       default: https://cloud.ibm.com
