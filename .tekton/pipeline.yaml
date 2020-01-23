@@ -46,7 +46,7 @@ spec:
         - name: directoryName
           value: ''
         - name: propertiesFile
-          value: 'secondbuild.properties'
+          value: ''
     - name: pipeline-3-containerize-task
       runAfter: [pipeline-2-clone-task]
       taskRef:
