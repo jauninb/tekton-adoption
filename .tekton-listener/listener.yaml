@@ -8,6 +8,10 @@ spec:
       description: The git repo
     - name: branch
       description: the branch for the git repo
+    - name: repository2
+      description: The second git repo
+    - name: branch2
+      description: the branch for the second git repo
     - name: api
       description: the ibmcloud api
       default: https://cloud.ibm.com
@@ -82,6 +86,10 @@ spec:
           value: $(params.repository)
         - name: branch
           value: $(params.branch)
+        - name: repository2
+          value: $(params.repository2)
+        - name: branch2
+          value: $(params.branch2)
         # - name: apikey
         #   value: $(params.apikey)
         # - name: toolchainRegion
