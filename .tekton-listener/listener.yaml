@@ -147,7 +147,7 @@ spec:
     - name: revision
       value: $(event.head_commit.id)
     - name: branch
-      value: "integration"
+      value: "unknown-integration"
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: EventListener
