@@ -119,10 +119,25 @@ spec:
         - |
           source /steps/next-step-env.properties
           echo "Cloning $REPOSITORY"
-          GIT_URL=$REPOSITORY
-          REPOSITORY=$(echo "$REPOSITORY" | sed -e "s/:\/\//:\/\/$GIT_AUTH_USER:$GIT_TOKEN@/g")
+          # Add the proper creds to the git repository
+          GIT_URL=$(echo "$REPOSITORY" | sed -e "s/:\/\//:\/\/$GIT_AUTH_USER:$GIT_TOKEN@/g")
           cd /artifacts
-          git clone -q -b $BRANCH $REPOSITORY $DIRECTORY_NAME
+          if [ "$REVISION" ]; then
+            # check if the branch exists (that may not be the case in case of a pipeline-run re-run)
+            if [ -z "$BRANCH" ]; then
+              # No branch provided
+              git clone -q -n $GIT_URL $DIRECTORY_NAME
+            elif git ls-remote --heads --exit-code $GIT_URL $BRANCH > /dev/null 2>&1; then
+              git clone -q -b $BRANCH $GIT_URL $DIRECTORY_NAME
+            else
+              echo "branch $BRANCH does not exists in $REPOSITORY"
+              git clone -q -n $GIT_URL $DIRECTORY_NAME
+            fi
+            # Point the HEAD to the specific revision
+            git checkout -q $REVISION
+          else
+            git clone -q -b $BRANCH $GIT_URL $DIRECTORY_NAME
+          fi
           current_dir=$(pwd)
           if [ -z "$DIRECTORY_NAME" ]; then
             # Find the "humanish" part of the git source repository that corresponds to the clone directory
@@ -130,16 +145,12 @@ spec:
             DIRECTORY_NAME=$(basename "${GIT_REPOSITORY##*/}" .git)
           fi
           cd $DIRECTORY_NAME
-          if [ "$REVISION" ]; then
-            git checkout $REVISION
-          fi
-          GIT_BRANCH=$(cat .git/HEAD | awk -F/ '{print $3}')
           GIT_COMMIT=$(git show-ref --head | head -n1 | awk '{print $1}')
           cd $current_dir
           echo "git clone of $GIT_REPOSITORY (branch $GIT_BRANCH - commit $GIT_COMMIT) done to directory $DIRECTORY_NAME"
           if [ "$PROPERTIES_FILE" ]; then
-            echo "GIT_URL=$GIT_URL" > $PROPERTIES_FILE
-            echo "GIT_BRANCH=$GIT_BRANCH" >> $PROPERTIES_FILE
+            echo "GIT_URL=$REPOSITORY" > $PROPERTIES_FILE
+            echo "GIT_BRANCH=$BRANCH" >> $PROPERTIES_FILE
             echo "GIT_COMMIT=$GIT_COMMIT" >> $PROPERTIES_FILE
             echo "$PROPERTIES_FILE content:"
             cat $PROPERTIES_FILE

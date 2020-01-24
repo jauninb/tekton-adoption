@@ -123,7 +123,7 @@ spec:
 apiVersion: tekton.dev/v1alpha1
 kind: TriggerBinding
 metadata:
-  name: trigger-binding-git-event
+  name: trigger-binding-git-event-dev
 spec:
   params:
     - name: repository
@@ -162,6 +162,6 @@ metadata:
 spec:
   triggers:
     - binding:
-        name: trigger-binding-git-event
+        name: trigger-binding-git-event-dev
       template:
         name: trigger-template
