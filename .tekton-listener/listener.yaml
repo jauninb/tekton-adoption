@@ -8,6 +8,8 @@ spec:
       description: The git repo
     - name: branch
       description: the branch for the git repo
+    - name: revision
+      default: ''
     - name: repository2
       description: The second git repo
     - name: branch2
@@ -87,6 +89,8 @@ spec:
           value: $(params.repository)
         - name: branch
           value: $(params.branch)
+        - name: revision
+          value: $(params.revision)
         - name: repository2
           value: $(params.repository2)
         - name: branch2
