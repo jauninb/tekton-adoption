@@ -12,6 +12,11 @@ spec:
       - name: branch
         description: the git branch
         default: master
+      - name: revision
+        description: |
+          the git revision/commit to update the git HEAD to.
+          Default to blank meaning only use the branch
+        default: ''
       - name: directoryName
         description: |
           name of the new directory to clone into.
@@ -102,6 +107,8 @@ spec:
           value: $(inputs.params.repository)
         - name: BRANCH
           value: $(inputs.params.branch)
+        - name: REVISION
+          value: $(inputs.params.revision)
         - name: DIRECTORY_NAME
           value: $(inputs.params.directoryName)
         - name: PROPERTIES_FILE
@@ -115,8 +122,14 @@ spec:
           REPOSITORY=$(echo "$REPOSITORY" | sed -e "s/:\/\//:\/\/$GIT_AUTH_USER:$GIT_TOKEN@/g")
           cd /artifacts
           git clone -q -b $BRANCH $REPOSITORY $DIRECTORY_NAME
+          current_dir=$(pwd)
+          cd $DIRECTORY_NAME
+          if [ "$REVISION" ]; then
+            git checkout $REVISION
+          fi
           GIT_BRANCH=$(cat .git/HEAD | awk -F/ '{print $3}')
           GIT_COMMIT=$(git show-ref --head | head -n1 | awk '{print $1}')
+          cd $current_dir
           if [ "$PROPERTIES_FILE" ]; then
             echo "GIT_URL=$GIT_URL" > $PROPERTIES_FILE
             echo "GIT_BRANCH=$GIT_BRANCH" >> $PROPERTIES_FILE
