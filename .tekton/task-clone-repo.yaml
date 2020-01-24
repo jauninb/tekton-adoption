@@ -129,7 +129,7 @@ spec:
             # GIT_REPOSITORY contains the repository url with .git suffix
             echo "GIT_REPOSITORY=${GIT_REPOSITORY}"
             echo "humanish=${GIT_REPOSITORY##*/}"
-            DIRECTORY_NAME=$(basename -s .git "${GIT_REPOSITORY##*/}")
+            DIRECTORY_NAME=$(basename "${GIT_REPOSITORY##*/}" .git)
           fi
           cd $DIRECTORY_NAME
           if [ "$REVISION" ]; then
