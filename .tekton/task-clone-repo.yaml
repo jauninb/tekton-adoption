@@ -127,6 +127,8 @@ spec:
           if [ -z "$DIRECTORY_NAME" ]; then
             # Find the "humanish" part of the git source repository that corresponds to the clone directory
             # GIT_REPOSITORY contains the repository url with .git suffix
+            echo "GIT_REPOSITORY=${GIT_REPOSITORY}"
+            echo "humanish=${GIT_REPOSITORY##*/}"
             DIRECTORY_NAME=$(basename -s .git "${GIT_REPOSITORY##*/}")
           fi
           cd $DIRECTORY_NAME
