@@ -93,7 +93,8 @@ spec:
           else
             GIT_AUTH_USER="x-token-auth"
           fi;
-          echo "GIT_AUTH_USER=$GIT_AUTH_USER" > /steps/next-step-env.properties
+          echo "GIT_REPOSITORY=$REPOSITORY" > /steps/next-step-env.properties
+          echo "GIT_AUTH_USER=$GIT_AUTH_USER" >> /steps/next-step-env.properties
           echo "GIT_TOKEN=$GIT_TOKEN" >> /steps/next-step-env.properties
       volumeMounts:
         - mountPath: /artifacts
@@ -123,6 +124,11 @@ spec:
           cd /artifacts
           git clone -q -b $BRANCH $REPOSITORY $DIRECTORY_NAME
           current_dir=$(pwd)
+          if [ -z "$DIRECTORY_NAME" ]; then
+            # Find the "humanish" part of the git source repository that corresponds to the clone directory
+            # GIT_REPOSITORY contains the repository url with .git suffix
+            DIRECTORY_NAME=$(basename -s .git "${GIT_REPOSITORY##*/}")
+          fi
           cd $DIRECTORY_NAME
           if [ "$REVISION" ]; then
             git checkout $REVISION
@@ -134,7 +140,6 @@ spec:
             echo "GIT_URL=$GIT_URL" > $PROPERTIES_FILE
             echo "GIT_BRANCH=$GIT_BRANCH" >> $PROPERTIES_FILE
             echo "GIT_COMMIT=$GIT_COMMIT" >> $PROPERTIES_FILE
-            echo "GIT_PREVIOUS_COMMIT=$GIT_PREVIOUS_COMMIT" >> $PROPERTIES_FILE
             cat $PROPERTIES_FILE
           fi
       volumeMounts:
