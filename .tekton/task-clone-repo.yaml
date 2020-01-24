@@ -121,6 +121,11 @@ spec:
           echo "Cloning $REPOSITORY"
           # Add the proper creds to the git repository
           GIT_URL=$(echo "$REPOSITORY" | sed -e "s/:\/\//:\/\/$GIT_AUTH_USER:$GIT_TOKEN@/g")
+
+          ############################
+          env | sort
+          ############################
+
           cd /artifacts
           if [ "$REVISION" ]; then
             # check if the branch exists (that may not be the case in case of a pipeline-run re-run)
