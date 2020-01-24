@@ -9,7 +9,7 @@ spec:
     - name: branch
       description: the branch for the git repo
     - name: revision
-      default: ""
+      default: null
     - name: repository2
       description: The second git repo
     - name: branch2
@@ -110,8 +110,6 @@ spec:
   params:
     - name: branch
       value: "master"
-    - name: revision
-      value: ""
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: TriggerBinding
@@ -121,8 +119,6 @@ spec:
   params:
     - name: branch
       value: "integration"
-    - name: revision
-      value: ""
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: TriggerBinding
