@@ -126,6 +126,8 @@ spec:
       value: $(event.repository.url)
     - name: revision
       value: $(event.head_commit.id)
+    - name: branch
+      value: "master"
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: EventListener
@@ -155,8 +157,7 @@ metadata:
   name: git-event-listener-dev
 spec:
   triggers:
-    - bindings:
-        - name: trigger-binding-dev
-        - name: trigger-binding-git-event
+    - binding:
+        name: trigger-binding-git-event
       template:
         name: trigger-template
