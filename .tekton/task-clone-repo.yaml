@@ -6,7 +6,7 @@ spec:
   inputs:
     params:
       - name: task-pvc
-        description: the output pvc - this is where the clone repository will be stored
+        description: the output pvc - this is where the cloned repository will be stored
       - name: repository
         description: the git repo url
       - name: branch

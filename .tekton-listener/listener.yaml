@@ -117,6 +117,17 @@ spec:
       value: "integration"
 ---
 apiVersion: tekton.dev/v1alpha1
+kind: TriggerBinding
+metadata:
+  name: trigger-binding-git-event
+spec:
+  params:
+    - name: repository
+      value: $(event.repository.url)
+    - name: revision
+      value: $(event.head_commit.id)
+---
+apiVersion: tekton.dev/v1alpha1
 kind: EventListener
 metadata:
   name: event-listener-dev
@@ -135,5 +146,17 @@ spec:
   triggers:
     - binding:
         name: trigger-binding-staging
+      template:
+        name: trigger-template
+---
+apiVersion: tekton.dev/v1alpha1
+kind: EventListener
+metadata:
+  name: git-event-listener-dev
+spec:
+  triggers:
+    - bindings:
+        - name: trigger-binding-dev
+        - name: trigger-binding-git-event
       template:
         name: trigger-template
