@@ -154,7 +154,7 @@ spec:
           fi
           GIT_COMMIT=$(git show-ref --head | head -n1 | awk '{print $1}')
           cd $current_dir
-          echo "git clone of $GIT_REPOSITORY (branch $GIT_BRANCH - commit $GIT_COMMIT) done to directory $DIRECTORY_NAME"
+          echo "git clone of $GIT_REPOSITORY (branch $BRANCH - commit $GIT_COMMIT) done to directory $DIRECTORY_NAME"
           if [ "$PROPERTIES_FILE" ]; then
             echo "GIT_URL=$REPOSITORY" > $PROPERTIES_FILE
             echo "GIT_BRANCH=$BRANCH" >> $PROPERTIES_FILE

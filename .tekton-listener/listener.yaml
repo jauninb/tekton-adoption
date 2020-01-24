@@ -110,6 +110,8 @@ spec:
   params:
     - name: branch
       value: "master"
+    - name: revision
+      value: ""
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: TriggerBinding
@@ -119,6 +121,8 @@ spec:
   params:
     - name: branch
       value: "integration"
+    - name: revision
+      value: ""
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: TriggerBinding
