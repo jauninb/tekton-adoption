@@ -12,6 +12,7 @@ spec:
       description: |
         commitid of the git repository to fetch.
         Default to a single space string as a workaround until a null/empty param can flow to Task
+        if not then the set value to the task will be the string "$(params.revision)"
       default: ' '
     - name: repository2
       description: The second git repo

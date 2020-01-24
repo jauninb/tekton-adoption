@@ -132,15 +132,15 @@ spec:
             echo "Fetching specific -${REVISION}- commit"
             if [ -z "$BRANCH" ]; then
               # No branch provided
-              git clone -n $GIT_URL $DIRECTORY_NAME
+              git clone -q -n $GIT_URL $DIRECTORY_NAME
             elif git ls-remote --heads --exit-code $GIT_URL $BRANCH > /dev/null 2>&1; then
-              git clone -b $BRANCH $GIT_URL $DIRECTORY_NAME
+              git clone -q -b $BRANCH $GIT_URL $DIRECTORY_NAME
             else
               echo "branch $BRANCH does not exists in $REPOSITORY"
-              git clone -n $GIT_URL $DIRECTORY_NAME
+              git clone -q -n $GIT_URL $DIRECTORY_NAME
             fi
           else
-            git clone -b $BRANCH $GIT_URL $DIRECTORY_NAME
+            git clone -q -b $BRANCH $GIT_URL $DIRECTORY_NAME
           fi
           current_dir=$(pwd)
           if [ -z "$DIRECTORY_NAME" ]; then
@@ -151,7 +151,7 @@ spec:
           cd $DIRECTORY_NAME
           if [ "$REVISION" ]; then
             # Point the HEAD to the specific revision
-            git checkout $REVISION
+            git checkout -q $REVISION
           fi
           GIT_COMMIT=$(git show-ref --head | head -n1 | awk '{print $1}')
           cd $current_dir
