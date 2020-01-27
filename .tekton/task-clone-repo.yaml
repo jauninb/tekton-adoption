@@ -16,9 +16,7 @@ spec:
         description: |
           the git revision/commit to update the git HEAD to.
           Default is to mean only use the branch
-          Default to a single space string as a workaround until a null/empty param can flow to Task
-          if not then the set value to the task will be the string "$(params.revision)"
-        default: ' '
+        default: ''
       - name: directoryName
         description: |
           name of the new directory to clone into.
