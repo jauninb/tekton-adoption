@@ -13,7 +13,7 @@ spec:
         commitid of the git repository to fetch.
         Default to a single space string as a workaround until a null/empty param can flow to Task
         if not then the set value to the task will be the string "$(params.revision)"
-      default: " "
+      default: ' '
     - name: repository2
       description: The second git repo
     - name: branch2
@@ -99,12 +99,6 @@ spec:
             value: $(params.repository2)
           - name: branch2
             value: $(params.branch2)
-        # - name: apikey
-        #   value: $(params.apikey)
-        # - name: toolchainRegion
-        #   value: $(params.toolchainRegion)
-        # - name: toolchainId
-        #   value: $(params.toolchainId)
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: TriggerBinding

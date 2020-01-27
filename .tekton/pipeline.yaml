@@ -15,13 +15,6 @@ spec:
       description: the second git repo
     - name: branch2
       description: the branch for the second git repo
-    # - name: apikey
-    #   description: the ibmcloud api key
-    # - name: toolchainRegion
-    #   description: the ibmcloud region containing the toolchain referencing the repository
-    #   default: us-south
-    # - name: toolchainId
-    #   description: The IBM Cloud Kubernetes cluster region
   tasks:
     - name: pipeline-1-clone-task
       taskRef:
