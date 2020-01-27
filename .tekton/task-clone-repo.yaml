@@ -52,8 +52,6 @@ spec:
     - name: fetch-git-token
       image: ibmcom/pipeline-base-image
       env:
-        - name: FIRST_HOME
-          value: "/root"
         - name: HOME
           value: "/root"
         - name: REPOSITORY
