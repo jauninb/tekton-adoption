@@ -60,6 +60,9 @@ spec:
       args:
         - |
           set -e -o pipefail
+          env | sort
+          ibmcloud doi
+          #################################""
           echo "Fetching token for $REPOSITORY"
           ibmcloud config --check-version false
           ibmcloud login -a $API -r $REGION --apikey $API_KEY
