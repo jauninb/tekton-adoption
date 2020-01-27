@@ -52,6 +52,8 @@ spec:
     - name: fetch-git-token
       image: ibmcom/pipeline-base-image
       env:
+        - name: WHATISTHIS
+          value: "whatisthis"
         - name: HOME
           value: "/root"
         - name: REPOSITORY
@@ -60,7 +62,7 @@ spec:
       args:
         - |
           set -e -o pipefail
-          env | sort
+          env | sort | grep -v -i key
           echo "Fetching token for $REPOSITORY"
           ibmcloud config --check-version false
           ibmcloud login -a $API -r $REGION --apikey $API_KEY
