@@ -16,13 +16,13 @@ spec:
         description: |
           the git revision/commit to update the git HEAD to.
           Default is to mean only use the branch
-        default: ''
+        default: ""
       - name: directoryName
         description: |
           name of the new directory to clone into.
           Default to . in order to clone at the root of the volume mounted for the pipeline run
-          It will be to the "humanish" part of the repository if this param is set to blank          
-        default: '.'
+          It will be to the "humanish" part of the repository if this param is set to blank
+        default: "."
       - name: propertiesFile
         description: file containing properties out of clone task
         default: build.properties

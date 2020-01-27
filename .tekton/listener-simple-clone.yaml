@@ -21,7 +21,7 @@ spec:
     - name: containerRegistryToken
       description: Token to connect to IBM Container Registry to pull image
     - name: dockerconfigjson
-      description: | 
+      description: |
         content of .dockerconfigjson for a secret of type kubernetes.io/dockerconfigjson.
         This can be created using "kubectl create secret --dry-run=true -o yaml docker-registry tekton-adoption --docker-server=${REGISTRY_URL} --docker-password=${TOKEN} --docker-username=iamapikey --docker-email=a@b.com"
   resourcetemplates:
@@ -58,7 +58,7 @@ spec:
     #   type: kubernetes.io/basic-auth
     #   stringData:
     #     username: iamapikey
-    #     password: $(params.containerRegistryToken)        
+    #     password: $(params.containerRegistryToken)
     - apiVersion: v1
       kind: ServiceAccount
       metadata:
@@ -73,12 +73,12 @@ spec:
         pipelineRef:
           name: pipeline-simple-clone
         params:
-        - name: pipeline-pvc
-          value: pipelinerun-$(uid)-pvc
-        - name: repository
-          value: $(params.repository)
-        - name: branch
-          value: $(params.branch)
+          - name: pipeline-pvc
+            value: pipelinerun-$(uid)-pvc
+          - name: repository
+            value: $(params.repository)
+          - name: branch
+            value: $(params.branch)
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: TriggerBinding

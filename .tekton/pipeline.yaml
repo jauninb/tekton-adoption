@@ -47,9 +47,9 @@ spec:
         - name: branch
           value: $(params.branch2)
         - name: directoryName
-          value: ''
+          value: ""
         - name: propertiesFile
-          value: ''
+          value: ""
     - name: pipeline-3-containerize-task
       runAfter: [pipeline-2-clone-task]
       taskRef:

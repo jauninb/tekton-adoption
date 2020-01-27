@@ -13,7 +13,7 @@ spec:
         commitid of the git repository to fetch.
         Default to a single space string as a workaround until a null/empty param can flow to Task
         if not then the set value to the task will be the string "$(params.revision)"
-      default: ' '
+      default: " "
     - name: repository2
       description: The second git repo
     - name: branch2
@@ -32,7 +32,7 @@ spec:
     - name: containerRegistryToken
       description: Token to connect to IBM Container Registry to pull image
     - name: dockerconfigjson
-      description: | 
+      description: |
         content of .dockerconfigjson for a secret of type kubernetes.io/dockerconfigjson.
         This can be created using "kubectl create secret --dry-run=true -o yaml docker-registry tekton-adoption --docker-server=${REGISTRY_URL} --docker-password=${TOKEN} --docker-username=iamapikey --docker-email=a@b.com"
   resourcetemplates:
@@ -69,7 +69,7 @@ spec:
     #   type: kubernetes.io/basic-auth
     #   stringData:
     #     username: iamapikey
-    #     password: $(params.containerRegistryToken)        
+    #     password: $(params.containerRegistryToken)
     - apiVersion: v1
       kind: ServiceAccount
       metadata:
@@ -84,21 +84,21 @@ spec:
         pipelineRef:
           name: pipeline
         serviceAccounts:
-        - taskName: pipeline-3-containerize-task
-          serviceAccount: containerize-build-sa
+          - taskName: pipeline-3-containerize-task
+            serviceAccount: containerize-build-sa
         params:
-        - name: pipeline-pvc
-          value: pipelinerun-$(uid)-pvc
-        - name: repository
-          value: $(params.repository)
-        - name: branch
-          value: $(params.branch)
-        - name: revision
-          value: $(params.revision)
-        - name: repository2
-          value: $(params.repository2)
-        - name: branch2
-          value: $(params.branch2)
+          - name: pipeline-pvc
+            value: pipelinerun-$(uid)-pvc
+          - name: repository
+            value: $(params.repository)
+          - name: branch
+            value: $(params.branch)
+          - name: revision
+            value: $(params.revision)
+          - name: repository2
+            value: $(params.repository2)
+          - name: branch2
+            value: $(params.branch2)
         # - name: apikey
         #   value: $(params.apikey)
         # - name: toolchainRegion
@@ -192,4 +192,4 @@ spec:
     - binding:
         name: trigger-binding-git-event-staging
       template:
-        name: trigger-template        
+        name: trigger-template
