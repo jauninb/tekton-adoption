@@ -63,7 +63,7 @@ spec:
         - |
           set -e -o pipefail
           env | sort
-          ibmcloud doi
+          #ibmcloud doi
           #################################""
           echo "Fetching token for $REPOSITORY"
           ibmcloud config --check-version false
