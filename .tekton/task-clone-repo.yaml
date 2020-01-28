@@ -54,10 +54,6 @@ spec:
       env:
         - name: HOME
           value: "/root"
-        - name: WHATISTHIS
-          value: whatisthis
-        - name: WHATISTHIS2
-          value: whatisthis2
         - name: REPOSITORY
           value: $(inputs.params.repository)
       command: ["/bin/bash", "-c"]
@@ -65,6 +61,7 @@ spec:
         - |
           set -e -o pipefail
           env | sort | grep -v -i key
+          # HOME is not set appropriately - https://github.com/tektoncd/pipeline/issues/1836
           echo "Fetching token for $REPOSITORY"
           ibmcloud config --check-version false
           ibmcloud login -a $API -r $REGION --apikey $API_KEY
