@@ -52,12 +52,12 @@ spec:
     - name: fetch-git-token
       image: ibmcom/pipeline-base-image
       env:
+        - name: HOME
+          value: "/root"
         - name: WHATISTHIS
           value: whatisthis
         - name: WHATISTHIS2
           value: whatisthis2
-        - name: HOME
-          value: "/root"
         - name: REPOSITORY
           value: $(inputs.params.repository)
       command: ["/bin/bash", "-c"]
