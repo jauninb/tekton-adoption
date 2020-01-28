@@ -54,6 +54,8 @@ spec:
       env:
         - name: WHATISTHIS
           value: "whatisthis"
+        - name: WHATISTHIS2
+          value: "whatisthis2"
         - name: HOME
           value: "/root"
         - name: REPOSITORY
