@@ -62,11 +62,10 @@ spec:
           set -e -o pipefail
           echo "Fetching token for $REPOSITORY"
           ibmcloud config --check-version false
-          echo API=-${API:-"https://cloud.ibm.com"}-
-          ibmcloud login -a ${API:-"https://cloud.ibm.com"} -r $REGION --apikey $API_KEY
+          ibmcloud login -a $API -r $REGION --apikey $API_KEY
           TOKEN=$(ibmcloud iam oauth-tokens --output JSON | jq -r '.iam_token')
-          echo "Doing curl ${API:-"https://cloud.ibm.com"}/devops/toolchains/${TOOLCHAIN_ID}?env_id=ibm:yp:${REGION}"
-          curl -s -X GET -o _toolchain.json -H "Accept: application/json" -H "Authorization: $TOKEN" "${API:-"https://cloud.ibm.com"}/devops/toolchains/${TOOLCHAIN_ID}?env_id=ibm:yp:${REGION}"
+          echo "Doing curl ${API}/devops/toolchains/${TOOLCHAIN_ID}?env_id=ibm:yp:${REGION}"
+          curl -s -X GET -o _toolchain.json -H "Accept: application/json" -H "Authorization: $TOKEN" "${API}/devops/toolchains/${TOOLCHAIN_ID}?env_id=ibm:yp:${REGION}"
           if jq '.services' _toolchain.json > /dev/null 2>&1; then
             echo "Found toolchain with id $TOOLCHAIN_ID in region $REGION"
           else
