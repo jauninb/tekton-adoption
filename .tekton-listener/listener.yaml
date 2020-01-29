@@ -21,7 +21,7 @@ spec:
       default: master
     - name: api
       description: the ibmcloud api
-      default: https://cloud.ibm.com
+      # default: https://cloud.ibm.com
     - name: apikey
       description: the ibmcloud api key
     - name: toolchainRegion
