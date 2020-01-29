@@ -1,0 +1,57 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: ibmcloud-cluster-context
+spec:
+  inputs:
+    params:
+      # - name: apikey
+      #   description: the ibmcloud api key
+      # - name: api
+      #   description: the ibmcloud api url
+      #   default: https://cloud.ibm.com
+       - name: clusterRegion
+         description: the ibmcloud region hosting the cluster
+         default: us-south
+      # - name: toolchainId
+      #   description: the ibmcloud region hosting the toolchain
+  stepTemplate:
+    env:
+      - name: API
+        valueFrom:
+          configMapKeyRef:
+            name: cd-config
+            key: API
+      - name: API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: cd-secret
+            key: API_KEY
+  steps:
+    - name: build-docker-image
+      image: registry.ng.bluemix.net/otc-images/otc-k8s-build:latest
+      workingDir: /artifacts
+      env:
+        - name: HOME
+          value: "/root"
+        # - name: API_KEY
+        #   value: $(inputs.params.apikey)
+        # - name: API
+        #   value: $(inputs.params.api)
+        # - name: REGION
+        #   value: $(inputs.params.toolchainRegion)
+        # - name: TOOLCHAIN_ID
+        #   value: $(inputs.params.toolchainId)
+      command: ["/bin/bash", "-c"]
+      args:
+        - |
+          set -e -o pipefail
+          ls -l
+          env | sort
+          #sleep 180s
+      volumeMounts:
+        - mountPath: /steps
+          name: steps-volume
+  volumes:
+    - name: steps-volume
+      emptyDir: {}
