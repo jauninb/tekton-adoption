@@ -62,6 +62,7 @@ spec:
           set -e -o pipefail
           echo "Fetching token for $REPOSITORY"
           ibmcloud config --check-version false
+          echo API=-${API:-"https://cloud.ibm.com"}-
           ibmcloud login -a ${API:-"https://cloud.ibm.com"} -r $REGION --apikey $API_KEY
           TOKEN=$(ibmcloud iam oauth-tokens --output JSON | jq -r '.iam_token')
           echo "Doing curl ${API:-"https://cloud.ibm.com"}/devops/toolchains/${TOOLCHAIN_ID}?env_id=ibm:yp:${REGION}"
