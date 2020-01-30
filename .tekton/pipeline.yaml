@@ -14,18 +14,18 @@ spec:
   - name: app-image
     type: image
   tasks:
-    - name: pipeline-1-clone-task
-      taskRef:
-        name: clone-repo-task
-      params:
-        - name: task-pvc
-          value: $(params.pipeline-pvc)
-        - name: repository
-          value: $(params.repository)
-        - name: branch
-          value: $(params.branch)
+    # - name: pipeline-1-clone-task
+    #   taskRef:
+    #     name: clone-repo-task
+    #   params:
+    #     - name: task-pvc
+    #       value: $(params.pipeline-pvc)
+    #     - name: repository
+    #       value: $(params.repository)
+    #     - name: branch
+    #       value: $(params.branch)
     - name: pipeline-2-containerize-task
-      runAfter: [pipeline-1-clone-task]
+      # runAfter: [pipeline-1-clone-task]
       taskRef:
         name: containerize-task
       params:
