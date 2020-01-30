@@ -91,7 +91,7 @@ spec:
               exit 1
             fi
           fi
-          
+
           # ibmcloud login 
           ibmcloud config --check-version false
           ibmcloud login -a $API -r $REGION --apikey $API_KEY
@@ -99,8 +99,18 @@ spec:
           # Log container registry to the appropriate region
           ibmcloud cr region-set $REGISTRY_REGION
 
-          # Create the namespace if needed
-          ibmcloud cr namespaces
+          # Create the namespace if needed to ensure the push will be can be successfull
+          echo "Checking registry namespace: ${REGISTRY_NAMESPACE}"
+          NS=$( ibmcloud cr namespaces | grep ${REGISTRY_NAMESPACE} ||: )
+          if [ -z "${NS}" ]; then
+              echo "Registry namespace ${REGISTRY_NAMESPACE} not found, creating it."
+              ibmcloud cr namespace-add ${REGISTRY_NAMESPACE}
+              echo "Registry namespace ${REGISTRY_NAMESPACE} created."
+          else 
+              echo "Registry namespace ${REGISTRY_NAMESPACE} found."
+          fi
+          echo -e "Existing images in registry"
+          ibmcloud cr images --restrict ${REGISTRY_NAMESPACE}
           
           # create a k8s secret yaml of type dockerconfig to transform into a docker config file
           # https://github.com/tektoncd/pipeline/blob/v0.7.0/docs/resources.md#image-resource
