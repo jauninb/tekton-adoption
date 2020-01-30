@@ -111,6 +111,12 @@ spec:
 
           # create a k8s secret yaml of type dockerconfig to transform into a docker config file
           # https://github.com/tektoncd/pipeline/blob/v0.7.0/docs/resources.md#image-resource
+          kubectl create secret --dry-run=true --output=json \
+            docker-registry registry-dockerconfig-secret \
+            --docker-server=${REGISTRY_URL} \
+            --docker-password=${API_KEY} \
+            --docker-username=iamapikey --docker-email=a@b.com \
+            | jq -r '.data[".dockerconfigjson"]' | base64 -d > config.json
 
       volumeMounts:
         - mountPath: /steps
@@ -118,29 +124,35 @@ spec:
     - name: build-oci-image
       image: $(inputs.params.buildkit_image)
       workingDir: /artifacts
+      env:
+        - name: DOCKER_CONFIG
+          value: /steps
       securityContext:
         privileged: true
       command: ["/bin/sh", "-c"]
       args:
-          - |
-            pwd
-            ls -l
-            buildctl-daemonless.sh build \
-              --progress=plain \
-              --frontend=dockerfile.v0 \
-              --opt filename=$(inputs.params.dockerfile) \
-              --local context=/artifacts/$(inputs.params.image_context_path) --local dockerfile=/artifacts/$(inputs.params.image_context_path) \
-              --output "type=image,name=$(outputs.resources.builtImage.url),push=true" \
-              --export-cache type=inline \
-              --import-cache type=registry,ref=$(outputs.resources.builtImage.url)
+        - |
+          set -e -o pipefail
+          ##########################################################################
+          pwd
+          ls -l
+          ls -l $DOCKER_CONFIG
+          buildctl-daemonless.sh build \
+            --progress=plain \
+            --frontend=dockerfile.v0 \
+            --opt filename=$(inputs.params.dockerfile) \
+            --local context=/artifacts/$(inputs.params.image_context_path) --local dockerfile=/artifacts/$(inputs.params.image_context_path) \
+            --output "type=image,name=$(outputs.resources.builtImage.url),push=true" \
+            --export-cache type=inline \
+            --import-cache type=registry,ref=$(outputs.resources.builtImage.url)
 
-            # --output type=oci,dest=/builder/home/image-outputs/builtImage/output.tar \
+          # --output type=oci,dest=/builder/home/image-outputs/builtImage/output.tar \
 
-            # buildctl/buildkit does not provide an index.json as part of the output
-            # https://github.com/moby/buildkit/issues/1158 and https://github.com/moby/buildkit/issues/993
-            # https://github.com/moby/buildkit/pull/1315
+          # buildctl/buildkit does not provide an index.json as part of the output
+          # https://github.com/moby/buildkit/issues/1158 and https://github.com/moby/buildkit/issues/993
+          # https://github.com/moby/buildkit/pull/1315
 
-              ls -l -R /builder/home/image-outputs
+            ls -l -R /builder/home/image-outputs
       volumeMounts:
         - mountPath: /artifacts
           name: task-volume
