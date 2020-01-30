@@ -25,7 +25,7 @@ spec:
         - name: branch
           value: $(params.branch)
     - name: pipeline-2-containerize-task
-      # runAfter: [pipeline-1-clone-task]
+      runAfter: [pipeline-1-clone-task]
       taskRef:
         name: containerize-task
       params:
