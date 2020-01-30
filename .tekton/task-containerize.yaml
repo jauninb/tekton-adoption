@@ -111,7 +111,9 @@ spec:
           echo -e "Existing images in registry"
           ibmcloud cr images --restrict ${REGISTRY_NAMESPACE}
 
-          # create a k8s secret yaml of type dockerconfig to transform into a docker config file
+          # create a dry-run k8s secret of type docker-registry to obtain
+          # the content of a docker config.json file to access the target 
+          # ibmcloud container registry
           kubectl create secret --dry-run=true --output=json \
             docker-registry registry-dockerconfig-secret \
             --docker-server=${REGISTRY_URL} \
