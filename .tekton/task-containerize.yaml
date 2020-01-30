@@ -127,12 +127,12 @@ spec:
             ls -l
             buildctl-daemonless.sh build \
               --progress=plain \ 
-              --frontend=dockerfile.v0 \
-              --opt filename=$(inputs.params.dockerfile) \
-              --local context=. --local dockerfile=. \ 
-              --output type=image,name=$(outputs.resources.builtImage.url),push=true \
-              --export-cache  type=inline \
-              --import-cache type=registry,ref=$(outputs.resources.builtImage.url)
+              --frontend="dockerfile.v0" \
+              --opt "filename=$(inputs.params.dockerfile)" \
+              --local context="." --local dockerfile="." \ 
+              --output "type=image,name=$(outputs.resources.builtImage.url),push=true" \
+              --export-cache "type=inline" \
+              --import-cache "type=registry,ref=$(outputs.resources.builtImage.url)"
       volumeMounts:
         - mountPath: /artifacts
           name: task-volume
