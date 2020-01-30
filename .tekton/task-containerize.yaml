@@ -7,25 +7,22 @@ spec:
     params:
       - name: task-pvc
         description: the output pvc - this is where the clone repository will be stored
-      # - name: apikey
-      #   description: the ibmcloud api key
-      # - name: api
-      #   description: the ibmcloud api url
-      #   default: https://cloud.ibm.com
-      # - name: toolchainRegion
-      #   description: the ibmcloud region hosting the toolchain
-      #   default: us-south
-      # - name: toolchainId
-      #   description: the ibmcloud region hosting the toolchain
-      # - name: propertiesFile
-      #   description: file containing properties out of clone task
-      #   default: build.properties
       - name: continuous-delivery-context-configmap
         description: name of the configmap containing the continuous delivery pipeline context
         default: cd-config
       - name: continuous-delivery-context-secret
         description: name of the configmap containing the continuous delivery pipeline context secrets
         default: cd-secret
+      - name: image_context_path
+        default: .
+      - name: dockerfile
+        description: The name of the Dockerfile
+        default: "Dockerfile"
+      - name: buildkit_image
+        description: The name of the BuildKit image
+        # The image needs to be rootful because Tekton creates /builder/home/.docker/config.json owned by root:root with 0600
+        # https://github.com/tektoncd/pipeline/issues/852
+        default: "moby/buildkit:v0.6.2"
   outputs:
     resources:
       - name: builtImage
@@ -118,26 +115,23 @@ spec:
       volumeMounts:
         - mountPath: /steps
           name: steps-volume
-    - name: build-docker-image
-      image: registry.ng.bluemix.net/otc-images/otc-k8s-build:latest
+    - name: build-oci-image
+      image: $(inputs.params.buildkit_image)
       workingDir: /artifacts
-      env:
-        - name: HOME
-          value: "/root"
-        # - name: API_KEY
-        #   value: $(inputs.params.apikey)
-        # - name: API
-        #   value: $(inputs.params.api)
-        # - name: REGION
-        #   value: $(inputs.params.toolchainRegion)
-        # - name: TOOLCHAIN_ID
-        #   value: $(inputs.params.toolchainId)
+      securityContext:
+        privileged: true
       command: ["/bin/bash", "-c"]
       args:
-        - |
-          set -e -o pipefail
-          ls -l -R /builder/home/image-outputs
-          #sleep 180s
+          - |
+            buildctl-daemonless.sh build
+              --debug \
+              --progress=plain \ 
+              --frontend=dockerfile.v0 \
+              --opt filename=$(inputs.params.dockerfile) \
+              --local context=. --local dockerfile=. \ 
+              --output type=image,name=$(outputs.resources.builtImage.url),push=true \
+              --export-cache  type=inline \
+              --import-cache type=registry,ref=$(outputs.resources.builtImage.url)
       volumeMounts:
         - mountPath: /artifacts
           name: task-volume
