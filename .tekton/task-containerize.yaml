@@ -17,20 +17,52 @@ spec:
       #   default: us-south
       # - name: toolchainId
       #   description: the ibmcloud region hosting the toolchain
-      - name: propertiesFile
-        description: file containing properties out of clone task
-        default: build.properties
-  stepTemplate:
-    envFrom:
-      - configMapRef:
-          name: cd-config
-    env:
-      - name: API_KEY
-        valueFrom:
-          secretKeyRef:
-            name: cd-secret
-            key: API_KEY
+      # - name: propertiesFile
+      #   description: file containing properties out of clone task
+      #   default: build.properties
+  outputs:
+    resources:
+      - name: builtImage
+        type: image
   steps:
+    - name: find-registry-creds
+      image: ibmcom/pipeline-base-image
+      workingDir: /steps
+      env:
+        - name: API
+          valueFrom:
+            configMapKeyRef:
+              name: cd-config
+              key: API
+        - name: REGION
+          valueFrom:
+            configMapKeyRef:
+              name: cd-config
+              key: REGION
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: cd-secret
+              key: API_KEY
+      command: ["/bin/bash", "-c"]
+      args:
+        - |
+          # Parse the image url to find information (region, namespace, image name)
+          #ibmcloud config --check-version false
+          #ibmcloud login -a $API -r $REGION --apikey $API_KEY
+
+          ls -l /builder/home/image-outputs/
+          
+          # Login to ibmcloud cr for the appropriate region
+
+          # Create the namespace if needed
+
+          # create a k8s secret yaml of type dockerconfig to transform into a docker config file
+          # https://github.com/tektoncd/pipeline/blob/v0.7.0/docs/resources.md#image-resource
+
+      volumeMounts:
+        - mountPath: /steps
+          name: steps-volume
     - name: build-docker-image
       image: registry.ng.bluemix.net/otc-images/otc-k8s-build:latest
       workingDir: /artifacts

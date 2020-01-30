@@ -13,7 +13,7 @@ spec:
         commitid of the git repository to fetch.
         Default to a single space string as a workaround until a null/empty param can flow to Task
         if not then the set value to the task will be the string "$(params.revision)"
-      default: ' '
+      default: " "
     - name: repository2
       description: The second git repo
     - name: branch2
@@ -77,6 +77,15 @@ spec:
       imagePullSecrets:
         - name: private-registry-secret
     - apiVersion: tekton.dev/v1alpha1
+      kind: PipelineResource
+      metadata:
+        name: skaffold-image-leeroy-app
+      spec:
+        type: image
+        params:
+          - name: url
+            value: gcr.io/christiewilson-catfactory/leeroy-app
+    - apiVersion: tekton.dev/v1alpha1
       kind: PipelineRun
       metadata:
         name: pipelinerun-$(uid)
@@ -84,8 +93,12 @@ spec:
         pipelineRef:
           name: pipeline
         serviceAccounts:
-          - taskName: pipeline-3-containerize-task
+          - taskName: pipeline-2-containerize-task
             serviceAccount: containerize-build-sa
+        resources:
+          - name: app-image
+            resourceRef:
+              name: skaffold-image-leeroy-app
         params:
           - name: pipeline-pvc
             value: pipelinerun-$(uid)-pvc

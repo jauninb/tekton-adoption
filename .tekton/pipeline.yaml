@@ -10,11 +10,9 @@ spec:
       description: the git repo
     - name: branch
       description: the branch for the git repo
-    - name: revision
-    - name: repository2
-      description: the second git repo
-    - name: branch2
-      description: the branch for the second git repo
+  resources:
+  - name: app-image
+    type: image
   tasks:
     - name: pipeline-1-clone-task
       taskRef:
@@ -26,27 +24,15 @@ spec:
           value: $(params.repository)
         - name: branch
           value: $(params.branch)
-        - name: revision
-          value: $(params.revision)
-    - name: pipeline-2-clone-task
+    - name: pipeline-2-containerize-task
       runAfter: [pipeline-1-clone-task]
-      taskRef:
-        name: clone-repo-task
-      params:
-        - name: task-pvc
-          value: $(params.pipeline-pvc)
-        - name: repository
-          value: $(params.repository2)
-        - name: branch
-          value: $(params.branch2)
-        - name: directoryName
-          value: ""
-        - name: propertiesFile
-          value: ""
-    - name: pipeline-3-containerize-task
-      runAfter: [pipeline-2-clone-task]
       taskRef:
         name: containerize-task
       params:
         - name: task-pvc
           value: $(params.pipeline-pvc)
+      resources:          
+        outputs:
+          - name: builtImage
+            resource: app-image
+
