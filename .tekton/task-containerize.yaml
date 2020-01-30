@@ -130,9 +130,12 @@ spec:
               --frontend=dockerfile.v0 \
               --opt filename=$(inputs.params.dockerfile) \
               --local context=/artifacts/$(inputs.params.image_context_path) --local dockerfile=/artifacts/$(inputs.params.image_context_path) \
-              --output "type=image,name=$(outputs.resources.builtImage.url),push=true" \
-              --export-cache "type=inline" \
-              --import-cache "type=registry,ref=$(outputs.resources.builtImage.url)"
+              # --output "type=image,name=$(outputs.resources.builtImage.url),push=true" \
+              --output type=oci,dest=/builder/home/image-outputs/builtImage/output.tar \
+              --export-cache type=inline \
+              --import-cache type=registry,ref=$(outputs.resources.builtImage.url)
+
+              ls -l -R /builder/home/image-outputs
       volumeMounts:
         - mountPath: /artifacts
           name: task-volume
