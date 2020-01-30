@@ -147,6 +147,7 @@ spec:
             --opt filename=$(inputs.params.dockerfile) \
             --local context=/artifacts/$(inputs.params.pathToContext) --local dockerfile=/artifacts/$(inputs.params.pathToDockerfile) \
             --output "type=image,name=$(outputs.resources.builtImage.url),push=true" \
+            --output type=oci,dest=/builder/home/image-outputs/builtImage/output.tar \
             --export-cache type=inline \
             --import-cache type=registry,ref=$(outputs.resources.builtImage.url)
 
