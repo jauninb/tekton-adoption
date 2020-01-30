@@ -84,7 +84,7 @@ spec:
         type: image
         params:
           - name: url
-            value: eu-de.icr.io/jauninb-tekton/my-very-first-image
+            value: de.icr.io/jauninb-tekton/my-very-first-image
     - apiVersion: tekton.dev/v1alpha1
       kind: PipelineRun
       metadata:
