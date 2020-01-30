@@ -139,6 +139,15 @@ spec:
         - |
           set -e -o pipefail
           ##########################################################################
+
+          # buildctl/buildkit does not provide an index.json as part of the output
+          # https://github.com/moby/buildkit/issues/1158 and https://github.com/moby/buildkit/issues/993
+          # https://github.com/moby/buildkit/pull/1315
+          # unfortunately, this is needed for Tekton Image Pipeline Resource
+          # https://github.com/tektoncd/pipeline/blob/v0.7.0/docs/resources.md#image-resource
+
+          mkdir -p /workspace/output/builtImage
+
           buildctl-daemonless.sh build \
             --progress=plain \
             --frontend=dockerfile.v0 \
@@ -146,25 +155,13 @@ spec:
             --local context=/artifacts/$(inputs.params.pathToContext) --local dockerfile=/artifacts/$(inputs.params.pathToDockerfile) \
             --output "type=image,name=$(outputs.resources.builtImage.url),push=true,metadata-file=index.json" \
             --export-cache type=inline \
-            --import-cache type=registry,ref=$(outputs.resources.builtImage.url)
+            --import-cache type=registry,ref=$(outputs.resources.builtImage.url) | tee /workspace/output/builtImage/build.log
 
           # it is not possible to specify multiple exporters for now
           # --output type=oci,dest=/builder/home/image-outputs/builtImage/output.tar \
           # It is possible to assign multiple tags to the image with latest version of buildkit_image
           # see https://github.com/moby/buildkit/issues/797
 
-          # buildctl/buildkit does not provide an index.json as part of the output
-          # https://github.com/moby/buildkit/issues/1158 and https://github.com/moby/buildkit/issues/993
-          # https://github.com/moby/buildkit/pull/1315
-
-          # https://github.com/tektoncd/pipeline/blob/v0.7.0/docs/resources.md#image-resource
-
-          mkdir -p /builder/home/image-outputs/builtImage
-          echo "test-output-image" > /builder/home/image-outputs/builtImage/test.log
-          ls -l -R /builder/home/image-outputs
-
-          mkdir -p /workspace/output/builtImage
-          echo "test-output-image" > /workspace/output/builtImage/test.log
           ls -l -R /workspace/output/builtImage
           
       volumeMounts:
