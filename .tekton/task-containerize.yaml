@@ -53,7 +53,7 @@ spec:
           set -e -o pipefail
           ##########################################################################
           # Setting HOME explicitly to have ibmcloud plugins available
-          # doing the export rather than env definition is a workaround 
+          # doing the export rather than env definition is a workaround
           # until https://github.com/tektoncd/pipeline/issues/1836 is fixed
           export HOME="/root"
           ##########################################################################
@@ -72,7 +72,7 @@ spec:
               REGISTRY_REGION="us-south"
             fi
           else
-            export REGISTRY_REGION=$(echo $REGISTRY_URL | awk -F. '{print $1}')          
+            export REGISTRY_REGION=$(echo $REGISTRY_URL | awk -F. '{print $1}')
             if [ "$REGISTRY_REGION" == "jp" ]; then
               REGISTRY_REGION="ap-north"
             elif [ "$REGISTRY_REGION" == "au" ]; then
@@ -83,13 +83,13 @@ spec:
               REGISTRY_REGION="uk-south"
             elif [ "$REGISTRY_REGION" == "us" ]; then
               REGISTRY_REGION="us-south"
-            else 
+            else
               echo "No IBM Cloud Container Registry region found for the registry url $REGISTRY_URL"
               exit 1
             fi
           fi
 
-          # ibmcloud login 
+          # ibmcloud login
           ibmcloud config --check-version false
           ibmcloud login -a $API -r $REGION --apikey $API_KEY
 
@@ -103,12 +103,12 @@ spec:
               echo "Registry namespace ${REGISTRY_NAMESPACE} not found, creating it."
               ibmcloud cr namespace-add ${REGISTRY_NAMESPACE}
               echo "Registry namespace ${REGISTRY_NAMESPACE} created."
-          else 
+          else
               echo "Registry namespace ${REGISTRY_NAMESPACE} found."
           fi
           echo -e "Existing images in registry"
           ibmcloud cr images --restrict ${REGISTRY_NAMESPACE}
-          
+
           # create a k8s secret yaml of type dockerconfig to transform into a docker config file
           # https://github.com/tektoncd/pipeline/blob/v0.7.0/docs/resources.md#image-resource
 
@@ -126,10 +126,10 @@ spec:
             pwd
             ls -l
             buildctl-daemonless.sh build \
-              --progress=plain \ 
+              --progress=plain \
               --frontend="dockerfile.v0" \
               --opt "filename=$(inputs.params.dockerfile)" \
-              --local context="." --local dockerfile="." \ 
+              --local context="." --local dockerfile="." \
               --output "type=image,name=$(outputs.resources.builtImage.url),push=true" \
               --export-cache "type=inline" \
               --import-cache "type=registry,ref=$(outputs.resources.builtImage.url)"
