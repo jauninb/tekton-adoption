@@ -48,24 +48,26 @@ spec:
       args:
         - |
           # Parse the image url to find information (region, namespace, image name)
-          IMAGE_URL=$(outputs.resources.builtImage.url)
-          CR_ENDPOINT=$(echo $(outputs.resources.builtImage.url) |  awk -F/ '{print $1}')
-          CR_NAMESPACE=$(echo $(outputs.resources.builtImage.url) |  awk -F/ '{print $2}')
-          IMAGE_NAME=$(echo $(outputs.resources.builtImage.url) |  awk -F/ '{print $3}')
+          export IMAGE_URL=$(outputs.resources.builtImage.url)
+          export CR_ENDPOINT=$(echo $(outputs.resources.builtImage.url) |  awk -F/ '{print $1}')
+          export CR_NAMESPACE=$(echo $(outputs.resources.builtImage.url) |  awk -F/ '{print $2}')
+          export IMAGE_NAME=$(echo $(outputs.resources.builtImage.url) |  awk -F/ '{print $3}')
 
-          env | sort
+          # Find the ibmcloud container registry region
+          export CR_REGION=$(echo $CR_ENDPOINT | awk -F. '{print $1}')
 
-          #ibmcloud config --check-version false
-          #ibmcloud login -a $API -r $REGION --apikey $API_KEY
+          env | sort | grep -v -i key
 
-          
+          # ibmcloud login 
+          ibmcloud config --check-version false
+          ibmcloud login -a $API -r $REGION --apikey $API_KEY
 
-          ls -l -R /builder/home/image-outputs
-
-          # Login to ibmcloud cr for the appropriate region
+          # Log container registry to the appropriate region
+          ibmcloud cr region-set $CR_REGION
 
           # Create the namespace if needed
-
+          ibmcloud cr namespaces
+          
           # create a k8s secret yaml of type dockerconfig to transform into a docker config file
           # https://github.com/tektoncd/pipeline/blob/v0.7.0/docs/resources.md#image-resource
 
@@ -90,8 +92,7 @@ spec:
       args:
         - |
           set -e -o pipefail
-          ls -l
-          env | sort
+          ls -l -R /builder/home/image-outputs
           #sleep 180s
       volumeMounts:
         - mountPath: /artifacts

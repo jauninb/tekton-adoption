@@ -79,12 +79,12 @@ spec:
     - apiVersion: tekton.dev/v1alpha1
       kind: PipelineResource
       metadata:
-        name: skaffold-image-leeroy-app
+        name: my-very-first-image
       spec:
         type: image
         params:
           - name: url
-            value: gcr.io/christiewilson-catfactory/leeroy-app
+            value: eu-de.icr.io/jauninb-tekton/my-very-first-image
     - apiVersion: tekton.dev/v1alpha1
       kind: PipelineRun
       metadata:
@@ -98,7 +98,7 @@ spec:
         resources:
           - name: app-image
             resourceRef:
-              name: skaffold-image-leeroy-app
+              name: my-very-first-image
         params:
           - name: pipeline-pvc
             value: pipelinerun-$(uid)-pvc
