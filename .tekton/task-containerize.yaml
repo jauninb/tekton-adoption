@@ -130,11 +130,15 @@ spec:
               --frontend=dockerfile.v0 \
               --opt filename=$(inputs.params.dockerfile) \
               --local context=/artifacts/$(inputs.params.image_context_path) --local dockerfile=/artifacts/$(inputs.params.image_context_path) \
-              --output type=oci,dest=/builder/home/image-outputs/builtImage/output.tar \
+              --output "type=image,name=$(outputs.resources.builtImage.url),push=true" \
               --export-cache type=inline \
               --import-cache type=registry,ref=$(outputs.resources.builtImage.url)
 
-              # --output "type=image,name=$(outputs.resources.builtImage.url),push=true" \
+            # --output type=oci,dest=/builder/home/image-outputs/builtImage/output.tar \
+
+            # buildctl/buildkit does not provide an index.json as part of the output
+            # https://github.com/moby/buildkit/issues/1158 and https://github.com/moby/buildkit/issues/993
+            # https://github.com/moby/buildkit/pull/1315
 
               ls -l -R /builder/home/image-outputs
       volumeMounts:
