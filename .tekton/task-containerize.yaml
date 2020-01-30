@@ -51,8 +51,8 @@ spec:
           #ibmcloud config --check-version false
           #ibmcloud login -a $API -r $REGION --apikey $API_KEY
 
-          ls -l /builder/home/image-outputs/
-          
+          ls -l -R /builder/home/image-outputs
+
           # Login to ibmcloud cr for the appropriate region
 
           # Create the namespace if needed
