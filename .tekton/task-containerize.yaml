@@ -156,7 +156,12 @@ spec:
           # https://github.com/moby/buildkit/pull/1315
 
           # https://github.com/tektoncd/pipeline/blob/v0.7.0/docs/resources.md#image-resource
-          ls -l -R /builder/home/image-outputs          
+          ls -l -R /builder/home/image-outputs
+
+          mkdir -p /builder/home/image-outputs/builtImage
+
+          echo "test-output-image" > /builder/home/image-outputs/builtImage/test.log
+
       volumeMounts:
         - mountPath: /artifacts
           name: task-volume
