@@ -123,7 +123,9 @@ spec:
       command: ["/bin/sh", "-c"]
       args:
           - |
-            buildctl-daemonless.sh --debug  build \
+            pwd
+            ls -l
+            buildctl-daemonless.sh build \
               --progress=plain \ 
               --frontend=dockerfile.v0 \
               --opt filename=$(inputs.params.dockerfile) \
