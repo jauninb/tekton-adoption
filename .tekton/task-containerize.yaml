@@ -120,7 +120,7 @@ spec:
       workingDir: /artifacts
       securityContext:
         privileged: true
-      command: ["/bin/bash", "-c"]
+      command: ["/bin/sh", "-c"]
       args:
           - |
             buildctl-daemonless.sh build
