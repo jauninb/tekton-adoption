@@ -172,7 +172,6 @@ spec:
       command: ["/bin/bash", "-c"]
       args:
         - |
-          set -e -o pipefail
 
           ls -l
 
