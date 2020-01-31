@@ -191,7 +191,7 @@ spec:
           FULLY_QUALIFIED_IMAGE=$(grep -i 'pushing manifest' build.log | grep -i 'done' | awk '{print $5}')
 
           echo "Creating OCI image index - index.json - out of the build.log to reference image sha: $MANIFEST_SHA"
-          mkdir -p /workspace/builtImage
+          mkdir -p /steps/builtImage
           echo "{}" | \
           jq --arg manifest_sha "$MANIFEST_SHA" '{schemaVersion:2,manifests:[{"mediaType": "application/vnd.oci.image.manifest.v1+json", digest:$manifest_sha}]}' 2>&1 | \
           tee /steps/builtImage/index.json
