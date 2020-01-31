@@ -153,7 +153,7 @@ spec:
             --local context=/artifacts/$(inputs.params.pathToContext) --local dockerfile=/artifacts/$(inputs.params.pathToDockerfile) \
             --output "type=image,name=$(outputs.resources.builtImage.url),push=true,metadata-file=index.json" \
             --export-cache type=inline \
-            --import-cache type=registry,ref=$(outputs.resources.builtImage.url) | tee /steps/build.log
+            --import-cache type=registry,ref=$(outputs.resources.builtImage.url) 2>&1 | tee /steps/build.log
 
           # it is not possible to specify multiple exporters for now
           # --output type=oci,dest=/builder/home/image-outputs/builtImage/output.tar \
@@ -161,6 +161,9 @@ spec:
           # see https://github.com/moby/buildkit/issues/797
 
           ls -l /steps
+
+          tail /steps/build.log
+          
       volumeMounts:
         - mountPath: /artifacts
           name: task-volume
