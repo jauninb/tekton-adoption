@@ -163,7 +163,7 @@ spec:
           ls -l /steps
 
           tail /steps/build.log
-          
+
       volumeMounts:
         - mountPath: /artifacts
           name: task-volume
@@ -194,7 +194,7 @@ spec:
           echo "Creating OCI image index - index.json - out of the build.log to reference image sha: $MANIFEST_SHA"
           mkdir -p /builder/home/image-outputs/builtImage
           echo "{}" | \
-          jq --arg manifest_sha "$MANIFEST_SHA" '{schemaVersion:2,manifests:[{"mediaType": "application/vnd.docker.distribution.manifest.v2+json", digest:$manifest_sha}]}' | \
+          jq --arg manifest_sha "$MANIFEST_SHA" '{schemaVersion:2,manifests:[{"mediaType": "application/vnd.docker.distribution.manifest.v2+json", digest:$manifest_sha}]}' 2>&1 | \
           tee /builder/home/image-outputs/builtImage/index.json
       volumeMounts:
         - mountPath: /artifacts
