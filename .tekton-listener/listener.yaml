@@ -53,13 +53,13 @@ spec:
       stringData:
         API_KEY: $(params.apikey)
     # k8s resources to be able to pull docker image from a specific container registry
-    - apiVersion: v1
-      kind: Secret
-      metadata:
-        name: private-registry-secret
-      type: kubernetes.io/dockerconfigjson
-      data:
-        .dockerconfigjson: $(params.dockerconfigjson)
+    # - apiVersion: v1
+    #   kind: Secret
+    #   metadata:
+    #     name: private-registry-secret
+    #   type: kubernetes.io/dockerconfigjson
+    #   data:
+    #     .dockerconfigjson: $(params.dockerconfigjson)
     # - apiVersion: v1
     #   kind: Secret
     #   metadata:
@@ -70,12 +70,12 @@ spec:
     #   stringData:
     #     username: iamapikey
     #     password: $(params.containerRegistryToken)
-    - apiVersion: v1
-      kind: ServiceAccount
-      metadata:
-        name: containerize-build-sa
-      imagePullSecrets:
-        - name: private-registry-secret
+    # - apiVersion: v1
+    #   kind: ServiceAccount
+    #   metadata:
+    #     name: containerize-build-sa
+    #   imagePullSecrets:
+    #     - name: private-registry-secret
     - apiVersion: tekton.dev/v1alpha1
       kind: PipelineResource
       metadata:
@@ -92,9 +92,9 @@ spec:
       spec:
         pipelineRef:
           name: pipeline
-        serviceAccounts:
-          - taskName: pipeline-2-containerize-task
-            serviceAccount: containerize-build-sa
+        # serviceAccounts:
+        #   - taskName: pipeline-2-containerize-task
+        #     serviceAccount: containerize-build-sa
         resources:
           - name: app-image
             resourceRef:
