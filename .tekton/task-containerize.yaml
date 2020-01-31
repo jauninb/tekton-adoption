@@ -32,11 +32,11 @@ spec:
     #   - name: workspace
     #     type: git
     #     optional: true
-  outputs:
-    resources:
-      - name: builtImage
-        type: image
-        outputImageDir: /workspace/builtImage
+  # outputs:
+  #   resources:
+  #     - name: builtImage
+  #       type: image
+  #       outputImageDir: /workspace/builtImage
   steps:
     - name: check-registry
       image: ibmcom/pipeline-base-image
