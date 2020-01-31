@@ -31,10 +31,10 @@ spec:
       params:
         - name: task-pvc
           value: $(params.pipeline-pvc)
-      resources:          
-        outputs:
-          - name: builtImage
-            resource: app-image
+      # resources:          
+      #   outputs:
+      #     - name: builtImage
+      #       resource: app-image
     - name: pipeline-3-va-task
       runAfter: [pipeline-2-containerize-task]
       taskRef:
