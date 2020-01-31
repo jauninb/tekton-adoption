@@ -195,8 +195,10 @@ spec:
           echo "Creating OCI image index - index.json - out of the build.log to reference image sha: $MANIFEST_SHA"
           mkdir -p /workspace/builtImage
           echo "{}" | \
-          jq --arg manifest_sha "$MANIFEST_SHA" '{schemaVersion:2,manifests:[{"mediaType": "application/vnd.docker.distribution.manifest.v2+json", digest:$manifest_sha}]}' 2>&1 | \
+          jq --arg manifest_sha "$MANIFEST_SHA" '{schemaVersion:2,manifests:[{"mediaType": "application/vnd.oci.image.manifest.v1+json", digest:$manifest_sha}]}' 2>&1 | \
           tee /workspace/builtImage/index.json
+
+          # application/vnd.docker.distribution.manifest.v2+json
 
           ls -l /workspace/builtImage
 
