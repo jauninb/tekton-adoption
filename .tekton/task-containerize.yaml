@@ -22,7 +22,7 @@ spec:
         default: "Dockerfile"
       - name: buildkit_image
         description: The name of the BuildKit image
-        default: "moby/buildkit:v0.6.3"
+        default: "moby/buildkit:v0.6.3-rootless"
       - name: additionalTags
         type: array
         default: []
