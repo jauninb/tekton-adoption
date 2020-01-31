@@ -28,7 +28,7 @@ spec:
         default: []
     # resources:
     #   # TODO consider an optional git repository as the source of the image to build
-    #   # when cd tekton support will be to tekton pipeline v 0.10 
+    #   # when cd tekton support will be to tekton pipeline v 0.10
     #   - name: workspace
     #     type: git
     #     optional: true
@@ -119,7 +119,7 @@ spec:
           ibmcloud cr images --restrict ${REGISTRY_NAMESPACE}
 
           # create a dry-run k8s secret of type docker-registry to obtain
-          # the content of a docker config.json file to access the target 
+          # the content of a docker config.json file to access the target
           # ibmcloud container registry
           kubectl create secret --dry-run=true --output=json \
             docker-registry registry-dockerconfig-secret \
@@ -161,42 +161,41 @@ spec:
           # see https://github.com/moby/buildkit/issues/797
 
           ls -l /steps
-
       volumeMounts:
         - mountPath: /artifacts
           name: task-volume
         - mountPath: /steps
           name: steps-volume
-    # - name: process-build-log
-    #   # An image including only jq should be sufficient
-    #   image: ibmcom/pipeline-base-image
-    #   workingDir: /steps
-    #   command: ["/bin/bash", "-c"]
-    #   args:
-    #     - |
-    #       ls -l
+    - name: process-build-log
+      # An image including only jq should be sufficient
+      image: ibmcom/pipeline-base-image
+      workingDir: /steps
+      command: ["/bin/bash", "-c"]
+      args:
+        - |
+          ls -l
 
-    #       # buildctl/buildkit does not provide an index.json as part of the output
-    #       # https://github.com/moby/buildkit/issues/1158 and https://github.com/moby/buildkit/issues/993
-    #       # https://github.com/moby/buildkit/pull/1315
-    #       # unfortunately, this is needed for Tekton Image Pipeline Resource
-    #       # https://github.com/tektoncd/pipeline/blob/v0.7.0/docs/resources.md#image-resource
-    #       # so workaround for now is to process the buildkit log to find the required information
+          # buildctl/buildkit does not provide an index.json as part of the output
+          # https://github.com/moby/buildkit/issues/1158 and https://github.com/moby/buildkit/issues/993
+          # https://github.com/moby/buildkit/pull/1315
+          # unfortunately, this is needed for Tekton Image Pipeline Resource
+          # https://github.com/tektoncd/pipeline/blob/v0.7.0/docs/resources.md#image-resource
+          # so workaround for now is to process the buildkit log to find the required information
 
-    #       MANIFEST_SHA=$(grep -i 'exporting manifest' build.log | grep -i 'done' | awk '{print $4}')
-    #       CONFIG_SHA=$(grep -i 'exporting config' build.log | grep -i 'done' | awk '{print $4}')
-    #       FULLY_QUALIFIED_IMAGE=$(grep -i 'pushing manifest' build.log | grep -i 'done' | awk '{print $5}')
+          MANIFEST_SHA=$(grep -i 'exporting manifest' build.log | grep -i 'done' | awk '{print $4}')
+          CONFIG_SHA=$(grep -i 'exporting config' build.log | grep -i 'done' | awk '{print $4}')
+          FULLY_QUALIFIED_IMAGE=$(grep -i 'pushing manifest' build.log | grep -i 'done' | awk '{print $5}')
 
-    #       echo "Creating OCI image index - index.json out of the build.log"
-    #       mkdir -p /builder/home/image-outputs/builtImage
-    #       echo "{}" | \
-    #       jq --arg manifest_sha "$MANIFEST_SHA" '{schemaVersion:2,manifests:[{"mediaType": "application/vnd.docker.distribution.manifest.v2+json", digest:$manifest_sha}]}' | \
-    #       tee /builder/home/image-outputs/builtImage/index.json
-    #   volumeMounts:
-    #     - mountPath: /artifacts
-    #       name: task-volume
-    #     - mountPath: /steps
-    #       name: steps-volume
+          echo "Creating OCI image index - index.json out of the build.log"
+          mkdir -p /builder/home/image-outputs/builtImage
+          echo "{}" | \
+          jq --arg manifest_sha "$MANIFEST_SHA" '{schemaVersion:2,manifests:[{"mediaType": "application/vnd.docker.distribution.manifest.v2+json", digest:$manifest_sha}]}' | \
+          tee /builder/home/image-outputs/builtImage/index.json
+      volumeMounts:
+        - mountPath: /artifacts
+          name: task-volume
+        - mountPath: /steps
+          name: steps-volume
   volumes:
     - name: steps-volume
       emptyDir: {}
