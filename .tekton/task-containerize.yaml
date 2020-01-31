@@ -137,8 +137,8 @@ spec:
       env:
         - name: DOCKER_CONFIG
           value: /steps
-      # securityContext:
-      #   privileged: true
+      securityContext:
+        privileged: true
       command: ["/bin/sh", "-c"]
       args:
         - |
