@@ -182,11 +182,13 @@ spec:
           # https://github.com/tektoncd/pipeline/blob/v0.7.0/docs/resources.md#image-resource
           # so workaround for now is to process the buildkit log to find the required information
 
+          grep -i 'exporting manifest' build.log
+
           MANIFEST_SHA=$(grep -i 'exporting manifest' build.log | grep -i 'done' | awk '{print $4}')
           CONFIG_SHA=$(grep -i 'exporting config' build.log | grep -i 'done' | awk '{print $4}')
           FULLY_QUALIFIED_IMAGE=$(grep -i 'pushing manifest' build.log | grep -i 'done' | awk '{print $5}')
 
-          echo "Creating OCI image index - index.json out of the build.log"
+          echo "Creating OCI image index - index.json - out of the build.log to reference image sha: $MANIFEST_SHA"
           mkdir -p /builder/home/image-outputs/builtImage
           echo "{}" | \
           jq --arg manifest_sha "$MANIFEST_SHA" '{schemaVersion:2,manifests:[{"mediaType": "application/vnd.docker.distribution.manifest.v2+json", digest:$manifest_sha}]}' | \
