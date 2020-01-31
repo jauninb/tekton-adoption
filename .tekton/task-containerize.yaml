@@ -169,7 +169,7 @@ spec:
       # An image including only jq should be sufficient
       image: ibmcom/pipeline-base-image
       workingDir: /steps
-      command: ["/bin/sh", "-c"]
+      command: ["/bin/bash", "-c"]
       args:
         - |
           set -e -o pipefail
