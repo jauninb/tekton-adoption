@@ -30,6 +30,8 @@ spec:
       args:
         - |
 
+          # This place/location is for tekton >= 0.0 
+          # https://cd.foundation/blog/2019/12/12/whats-new-in-tekton-0-9/
           echo "Creating OCI image index - index.json - out of the build.log to reference image sha: $MANIFEST_SHA"
           echo "{}" | \
           jq --arg manifest_sha "sha256:1582e4175e25e835b94b0c59094d0413f9ceea6046493985549c07de2e090b69" '{schemaVersion:2,manifests:[{"mediaType": "application/vnd.oci.image.index.v1+json", size:1, digest:$manifest_sha}]}' 2>&1 | \
@@ -39,9 +41,11 @@ spec:
           jq --arg manifest_sha "sha256:2582e4175e25e835b94b0c59094d0413f9ceea6046493985549c07de2e090b69" '{schemaVersion:2,manifests:[{"mediaType": "application/vnd.oci.image.index.v1+json", size:2, digest:$manifest_sha}]}' 2>&1 | \
           tee /workspace/output/builtImage2/index.json
 
+          # Copy also in the legacy - v0.7.0
           mkdir -p /builder/home/image-outputs/builtImage1
           cp /workspace/output/builtImage1/index.json /builder/home/image-outputs/builtImage1
 
+          # Copy also in the legacy - v0.7.0
           mkdir -p /builder/home/image-outputs/builtImage2
           cp /workspace/output/builtImage2/index.json /builder/home/image-outputs/builtImage2
 
