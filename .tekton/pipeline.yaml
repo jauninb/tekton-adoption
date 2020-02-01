@@ -36,7 +36,6 @@ spec:
           - name: builtImage
             resource: app-image
     - name: pipeline-3-va-task
-      runAfter: [pipeline-2-containerize-task]
       taskRef:
         name: vulnerability-advisor-task
       params:
@@ -46,4 +45,5 @@ spec:
         inputs:
           - name: image
             resource: app-image
-
+            from:
+              - pipeline-2-containerize-task
