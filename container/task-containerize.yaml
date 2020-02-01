@@ -29,7 +29,14 @@ spec:
       command: ["/bin/bash", "-c"]
       args:
         - |
-          ls -l 
+          ls -l /
+
+          ls -l /artifacts
+
+          ls -l -R /workspace
+
+          ls -l -R /builder
+
       volumeMounts:
         - mountPath: /artifacts
           name: task-volume
