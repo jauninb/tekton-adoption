@@ -29,9 +29,15 @@ spec:
       command: ["/bin/bash", "-c"]
       args:
         - |
-          ls -l /
 
-          ls -l /artifacts
+
+          echo "Creating OCI image index - index.json - out of the build.log to reference image sha: $MANIFEST_SHA"
+          echo "{}" | \
+          jq --arg manifest_sha "sha_image1" '{schemaVersion:2,manifests:[{"mediaType": "application/vnd.oci.image.manifest.v1+json", digest:$manifest_sha}]}' 2>&1 | \
+          tee /workspace/output/builtImage1/index.json
+
+          jq --arg manifest_sha "sha_image2" '{schemaVersion:2,manifests:[{"mediaType": "application/vnd.oci.image.manifest.v1+json", digest:$manifest_sha}]}' 2>&1 | \
+          tee /workspace/output/builtImage2/index.json
 
           ls -l -R /workspace
 
