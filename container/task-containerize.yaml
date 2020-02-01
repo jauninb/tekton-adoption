@@ -30,7 +30,6 @@ spec:
       args:
         - |
 
-
           echo "Creating OCI image index - index.json - out of the build.log to reference image sha: $MANIFEST_SHA"
           echo "{}" | \
           jq --arg manifest_sha "sha256:4582e4175e25e835b94b0c59094d0413f9ceea6046493985549c07de2e090b69" '{schemaVersion:2,manifests:[{"mediaType": "application/vnd.oci.image.manifest.v1+json", digest:$manifest_sha}]}' 2>&1 | \
@@ -39,6 +38,9 @@ spec:
           echo "{}" | \
           jq --arg manifest_sha "sha256:4582e4175e25e835b94b0c59094d0413f9ceea6046493985549c07de2e090b69" '{schemaVersion:2,manifests:[{"mediaType": "application/vnd.oci.image.manifest.v1+json", digest:$manifest_sha}]}' 2>&1 | \
           tee /workspace/output/builtImage2/index.json
+
+          mkdir -p /builder/home/image-outputs/builtImage1
+          cp /workspace/output/builtImage1/index.json /builder/home/image-outputs/builtImage1
 
           ls -l -R /workspace
 
