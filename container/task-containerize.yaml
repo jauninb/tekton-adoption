@@ -30,11 +30,11 @@ spec:
       args:
         - |
 
-          # This place/location is for tekton >= 0.0 
+          # This place/location is for tekton >= 0.9 
           # https://cd.foundation/blog/2019/12/12/whats-new-in-tekton-0-9/
           echo "Creating OCI image index - index.json - out of the build.log to reference image sha: $MANIFEST_SHA"
           echo "{}" | \
-          jq --arg manifest_sha "sha256:1582e4175e25e835b94b0c59094d0413f9ceea6046493985549c07de2e090b69" '{schemaVersion:2,manifests:[{"mediaType": "application/vnd.oci.image.index.v1+json", size:1, digest:$manifest_sha}]}' 2>&1 | \
+          jq --arg manifest_sha "sha256:1582e4175e25e835b94b0c59094d0413f9ceea6046493985549c07de2e090b69" '{schemaVersion:2,manifests:[{"mediaType": "application/vnd.docker.distribution.manifest.v2+json", size:1, digest:$manifest_sha}]}' 2>&1 | \
           tee /workspace/output/builtImage1/index.json
 
           echo "{}" | \
@@ -52,6 +52,14 @@ spec:
           ls -l -R /workspace
 
           ls -l -R /builder
+
+          # Because of https://github.com/tektoncd/pipeline/issues/216          
+          # the image digest is always empty
+          # there was an alternative/workaround but it is updating using a specific account
+          # and using a kubectl command to update the resources
+          # see https://github.com/nlewo/poc-tekton#deploy-tasks
+          # https://raw.githubusercontent.com/tektoncd/catalog/0b48da8e336a4214aff46af242658dc056199b1c/update-image-digests/image-digest-updater.yaml
+          # https://raw.githubusercontent.com/tektoncd/catalog/0b48da8e336a4214aff46af242658dc056199b1c/update-image-digests/update-image-digests.yaml
 
       volumeMounts:
         - mountPath: /artifacts
