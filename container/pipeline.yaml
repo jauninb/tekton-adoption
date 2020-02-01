@@ -40,9 +40,9 @@ spec:
           - name: image1
             resource: app-image-1
             from:
-              - containerize-task
+              - pipeline-2-containerize-task
           - name: image2
             resource: app-image-2
             from:
-              - containerize-task
+              - pipeline-2-containerize-task
 
