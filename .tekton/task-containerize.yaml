@@ -169,7 +169,6 @@ spec:
           echo "Image Tags:"
           cat /steps/tags.lst
           echo "#######################"
-          # https://github.com/moby/buildkit/issues/797#issuecomment-573691991
           BUILDKIT_IMAGE_NAMES=""
 
           buildctl-daemonless.sh build \
@@ -177,11 +176,14 @@ spec:
             --frontend=dockerfile.v0 \
             --opt filename=$(inputs.params.dockerfile) \
             --local context=/artifacts/$(inputs.params.pathToContext) --local dockerfile=/artifacts/$(inputs.params.pathToDockerfile) \
-            --exporter=image --exporter-opt "name=$(outputs.resources.builtImage.url):1.0.0,$(outputs.resources.builtImage.url)" --exporter-opt "push=true" \
+            --output type=image,"name=$(outputs.resources.builtImage.url):1.0.0,$(outputs.resources.builtImage.url)",push=true \
             --export-cache type=inline \
             --import-cache type=registry,ref=$(outputs.resources.builtImage.url) 2>&1 | tee /steps/build.log
 
-          #  --output "type=image,name='$(outputs.resources.builtImage.url),$(outputs.resources.builtImage.url):1.0.0',push=true" \
+          # Using the deprecated --exporter option for now as the multiple name/tags using --output option
+          # is not working as expected: https://github.com/moby/buildkit/issues/797
+          #  --exporter=image --exporter-opt "name=$(outputs.resources.builtImage.url):1.0.0,$(outputs.resources.builtImage.url)" --exporter-opt "push=true" \
+          #  --output type=image,"name=$(outputs.resources.builtImage.url):1.0.0,$(outputs.resources.builtImage.url)",push=true \
 
           # it is not possible to specify multiple exporters for now
           # --output type=oci,dest=/builder/home/image-outputs/builtImage/output.tar \
