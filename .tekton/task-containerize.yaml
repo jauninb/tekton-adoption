@@ -62,7 +62,9 @@ spec:
       command: ["/bin/bash", "-c"]
       args:
         - |
+
           set -e -o pipefail
+
           ##########################################################################
           # Setting HOME explicitly to have ibmcloud plugins available
           # doing the export rather than env definition is a workaround
@@ -128,8 +130,25 @@ spec:
             docker-registry registry-dockerconfig-secret \
             --docker-server=${REGISTRY_URL} \
             --docker-password=${API_KEY} \
-            --docker-username=iamapikey --docker-email=a@b.com \
-            | jq -r '.data[".dockerconfigjson"]' | base64 -d > config.json
+            --docker-username=iamapikey --docker-email=a@b.com | \
+          jq -r '.data[".dockerconfigjson"]' | base64 -d > config.json
+
+          # Because of https://github.com/tektoncd/pipeline/issues/216          
+          # the image digest for input is/will always empty
+          # there was an alternative/workaround but it is updating using a specific account
+          # and using a kubectl command to update the resources
+          # see https://github.com/nlewo/poc-tekton#deploy-tasks
+          # https://raw.githubusercontent.com/tektoncd/catalog/0b48da8e336a4214aff46af242658dc056199b1c/update-image-digests/image-digest-updater.yaml
+          # https://raw.githubusercontent.com/tektoncd/catalog/0b48da8e336a4214aff46af242658dc056199b1c/update-image-digests/update-image-digests.yaml
+          # Here the workaround will be to add registry and image information in an output properties file
+          if [ "$PROPERTIES_FILE" ]; then
+            cd /artifacts
+            touch $PROPERTIES_FILE
+            echo "REGISTRY_URL=${REGISTRY_URL}" >> $PROPERTIES_FILE
+            echo "REGISTRY_NAMESPACE=${REGISTRY_NAMESPACE}" >> $PROPERTIES_FILE
+            echo "REGISTRY_REGION=${REGISTRY_REGION}" >> $PROPERTIES_FILE
+            echo "IMAGE_NAME=${IMAGE_NAME}" >> $PROPERTIES_FILE
+          fi
       volumeMounts:
         - mountPath: /steps
           name: steps-volume
@@ -145,6 +164,7 @@ spec:
       command: ["/bin/sh", "-c"]
       args:
         - |
+
           set -e -o pipefail
 
           # TODO Manage multiple tags for an image
@@ -200,14 +220,13 @@ spec:
           mkdir -p /builder/home/image-outputs/builtImage
           cp /workspace/output/builtImage/index.json /builder/home/image-outputs/builtImage
 
-          # Because of https://github.com/tektoncd/pipeline/issues/216          
-          # the image digest for input is/will always empty
-          # there was an alternative/workaround but it is updating using a specific account
-          # and using a kubectl command to update the resources
-          # see https://github.com/nlewo/poc-tekton#deploy-tasks
-          # https://raw.githubusercontent.com/tektoncd/catalog/0b48da8e336a4214aff46af242658dc056199b1c/update-image-digests/image-digest-updater.yaml
-          # https://raw.githubusercontent.com/tektoncd/catalog/0b48da8e336a4214aff46af242658dc056199b1c/update-image-digests/update-image-digests.yaml
-          # Here the workaround will be to add registry and image information in an output properties file
+          if [ "$PROPERTIES_FILE" ]; then
+            cd /artifacts
+            echo "IMAGE_TAG=${IMAGE_TAG}" >> $PROPERTIES_FILE
+            echo "IMAGE_MANIFEST_SHA=${MANIFEST_SHA}" >> $PROPERTIES_FILE
+            echo "$PROPERTIES_FILE content:"
+            cat $PROPERTIES_FILE
+          fi
 
       volumeMounts:
         - mountPath: /artifacts
