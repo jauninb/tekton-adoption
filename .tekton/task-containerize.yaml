@@ -163,7 +163,10 @@ spec:
           # Manage multiple tags for an image
           echo "${IMAGE_TAG:-latest}" > /steps/tags.lst
           echo "$(inputs.params.additionalTags)" >> /steps/tags.lst
+          echo "#######################"
+          echo "Image Tags:"
           cat /steps/tags.lst
+          echo "#######################"
           # https://github.com/moby/buildkit/issues/797#issuecomment-573691991
           BUILDKIT_IMAGE_NAMES=""
 
