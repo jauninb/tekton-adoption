@@ -65,7 +65,6 @@ spec:
       command: ["/bin/bash", "-c"]
       args:
         - |
-
           set -e -o pipefail
 
           ##########################################################################
@@ -158,8 +157,6 @@ spec:
       command: ["/bin/sh", "-c"]
       args:
         - |
-
-          set -e -o pipefail
           source /steps/next-step-env.properties
           export $(cut -d= -f1 /steps/next-step-env.properties)
 
@@ -202,7 +199,6 @@ spec:
       command: ["/bin/bash", "-c"]
       args:
         - |
-
           set -e -o pipefail
           source /steps/next-step-env.properties
           export $(cut -d= -f1 /steps/next-step-env.properties)
