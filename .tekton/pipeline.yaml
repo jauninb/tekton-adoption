@@ -35,17 +35,10 @@ spec:
           value: '1.0.0-static'
         - name: additionalTagsScript
           value: |
-            # Show this in the output error stderr
-            pwd >&2
-            ls -l >&2
-            cat /artifacts/build.properties >&2
             source /artifacts/build.properties
             export GIT_BRANCH 
             export GIT_COMMIT
-            export -p >&2
-            env | sort >&2
-            echo $GIT_BRANCH >&2
-            echo $GIT_COMMIT >&2
+            # Add a specific tag with branch and commit
             echo "1.0.0-${GIT_BRANCH}-${GIT_COMMIT}"
       resources:          
         outputs:
