@@ -164,7 +164,7 @@ spec:
 
           # Manage multiple tags for an image
           echo "${IMAGE_TAG:-latest}" > /steps/tags.lst
-          echo "$(inputs.params.additionalTags)" | sed -z 's/,/\n/g' >> /steps/tags.lst
+          echo "$(inputs.params.additionalTags)" | sed 's/,/\n/g' >> /steps/tags.lst
           echo "#######################"
           echo "Image Tags:"
           cat /steps/tags.lst
