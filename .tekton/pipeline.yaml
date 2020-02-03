@@ -33,6 +33,11 @@ spec:
           value: $(params.pipeline-pvc)
         - name: additionalTags
           value: '1.0.0-static'
+        - name: additionalTagsScript
+          value: |
+            # Show this in the output error stderr 
+            env | sort >&2
+            echo "1.0.0-dynamic"
       resources:          
         outputs:
           - name: builtImage
