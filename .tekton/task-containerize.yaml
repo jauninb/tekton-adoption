@@ -164,7 +164,7 @@ spec:
 
           # Manage multiple tags for an image
           echo "${IMAGE_TAG:-latest}" > /steps/tags.lst
-          echo "inputs.params.additionalTags" | sed -z 's/,/\n/g' >> /steps/tags.lst
+          echo "$(inputs.params.additionalTags)" | sed -z 's/,/\n/g' >> /steps/tags.lst
           echo "#######################"
           echo "Image Tags:"
           cat /steps/tags.lst
@@ -177,7 +177,7 @@ spec:
             --frontend=dockerfile.v0 \
             --opt filename=$(inputs.params.dockerfile) \
             --local context=/artifacts/$(inputs.params.pathToContext) --local dockerfile=/artifacts/$(inputs.params.pathToDockerfile) \
-            --output type=image,"name=$(outputs.resources.builtImage.url)",push=true \
+            --output type=image,"name=$(outputs.resources.builtImage.url):1.0.0,$(outputs.resources.builtImage.url):latest",push=true \
             --export-cache type=inline \
             --import-cache type=registry,ref=$(outputs.resources.builtImage.url) 2>&1 | tee /steps/build.log
 
