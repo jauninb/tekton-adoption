@@ -161,6 +161,11 @@ spec:
           export $(cut -d= -f1 /steps/next-step-env.properties)
 
           # Manage multiple tags for an image
+          echo "${IMAGE_TAG:-latest}" > /steps/tags.lst
+          echo "$(inputs.params.additionalTags)" >> /steps/tags.lst
+          cat /steps/tags.lst
+          # https://github.com/moby/buildkit/issues/797#issuecomment-573691991
+          BUILDKIT_IMAGE_NAMES=""
 
           buildctl-daemonless.sh build \
             --progress=plain \
