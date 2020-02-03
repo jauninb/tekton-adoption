@@ -40,8 +40,6 @@ spec:
             ls -l >&2
             cat /artifacts/build.properties >&2
             source /artifacts/build.properties
-            export GIT_BRANCH
-            export GIT_COMMIT
             env | sort >&2
             echo "1.0.0-$GIT_BRANCH-$GIT_COMMIT"
       resources:          
