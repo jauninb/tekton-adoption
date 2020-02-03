@@ -36,6 +36,7 @@ spec:
         - name: additionalTagsScript
           value: |
             # Show this in the output error stderr 
+            source /artifacts/build.properties
             env | sort >&2
             echo "1.0.0-dynamic"
       resources:          

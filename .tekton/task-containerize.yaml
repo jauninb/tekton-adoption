@@ -178,7 +178,7 @@ spec:
           echo "#######################"
           # Add the full image url with tags
           sed -i -e "s/^/$REGISTRY_URL\/$REGISTRY_NAMESPACE\/$IMAGE_NAME:/" /steps/tags.lst
-          sort --unique --output=/steps/tags.lst /steps/tags.lst
+          sort -u -o /steps/tags.lst /steps/tags.lst
           echo "Full Image URLs:"
           cat /steps/tags.lst
           echo "#######################"
