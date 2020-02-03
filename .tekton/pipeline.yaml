@@ -35,7 +35,9 @@ spec:
           value: '1.0.0-static'
         - name: additionalTagsScript
           value: |
-            # Show this in the output error stderr 
+            # Show this in the output error stderr
+            pwd >&2
+            ls -l >&2
             cat /artifacts/build.properties >&2
             source /artifacts/build.properties
             export GIT_BRANCH
