@@ -152,6 +152,8 @@ spec:
       env:
         - name: DOCKER_CONFIG
           value: /steps
+        - name: STATIC_ADDED_TAGS
+          value: $(inputs.params.additionalTags)
       securityContext:
         privileged: true
       command: ["/bin/sh", "-c"]
@@ -162,7 +164,7 @@ spec:
 
           # Manage multiple tags for an image
           echo "${IMAGE_TAG:-latest}" > /steps/tags.lst
-          echo "$(inputs.params.additionalTags)" >> /steps/tags.lst
+          echo "$STATIC_ADDED_TAGS" >> /steps/tags.lst
           echo "#######################"
           echo "Image Tags:"
           cat /steps/tags.lst

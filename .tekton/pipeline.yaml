@@ -31,6 +31,10 @@ spec:
       params:
         - name: task-pvc
           value: $(params.pipeline-pvc)
+        - name: additionalTags
+          value:
+            - '1.0.0'
+            - '1.0.0-dev'
       resources:          
         outputs:
           - name: builtImage
