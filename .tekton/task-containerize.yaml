@@ -177,7 +177,7 @@ spec:
             --frontend=dockerfile.v0 \
             --opt filename=$(inputs.params.dockerfile) \
             --local context=/artifacts/$(inputs.params.pathToContext) --local dockerfile=/artifacts/$(inputs.params.pathToDockerfile) \
-            --exporter=image --exporter-opt "name=$(outputs.resources.builtImage.url)" --exporter-opt "push=true"
+            --exporter=image --exporter-opt "name='$(outputs.resources.builtImage.url),$(outputs.resources.builtImage.url):1.0.0'" --exporter-opt "push=true" \
             --export-cache type=inline \
             --import-cache type=registry,ref=$(outputs.resources.builtImage.url) 2>&1 | tee /steps/build.log
 
