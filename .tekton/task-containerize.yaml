@@ -177,9 +177,11 @@ spec:
             --frontend=dockerfile.v0 \
             --opt filename=$(inputs.params.dockerfile) \
             --local context=/artifacts/$(inputs.params.pathToContext) --local dockerfile=/artifacts/$(inputs.params.pathToDockerfile) \
-            --output "type=image,name='$(outputs.resources.builtImage.url),$(outputs.resources.builtImage.url):1.0.0',push=true" \
+            --exporter=image --exporter-opt "name=$(outputs.resources.builtImage.url)" --exporter-opt "push=true"
             --export-cache type=inline \
             --import-cache type=registry,ref=$(outputs.resources.builtImage.url) 2>&1 | tee /steps/build.log
+
+          #  --output "type=image,name='$(outputs.resources.builtImage.url),$(outputs.resources.builtImage.url):1.0.0',push=true" \
 
           # it is not possible to specify multiple exporters for now
           # --output type=oci,dest=/builder/home/image-outputs/builtImage/output.tar \
