@@ -27,8 +27,10 @@ spec:
         description: file containing properties out of containerize task
         default: build.properties        
       - name: additionalTags
-        type: array
-        default: []
+        description: comma-separated list of additionalTags
+        # can not be defined as an array because of variable substition error for array
+        # https://github.com/tektoncd/pipeline/commit/86deacb04536f0f3e7176c6664cec8786678ed18
+        default: ''
       - name: additionalTagsScript
         description: Shell script that allows to add tags for the image to be build.
         default: ''
@@ -152,8 +154,6 @@ spec:
       env:
         - name: DOCKER_CONFIG
           value: /steps
-        - name: STATIC_ADDED_TAGS
-          value: $(inputs.params.additionalTags)
       securityContext:
         privileged: true
       command: ["/bin/sh", "-c"]
@@ -164,7 +164,7 @@ spec:
 
           # Manage multiple tags for an image
           echo "${IMAGE_TAG:-latest}" > /steps/tags.lst
-          echo "$STATIC_ADDED_TAGS" >> /steps/tags.lst
+          echo "inputs.params.additionalTags" | sed -z 's/,/\n/g' >> /steps/tags.lst
           echo "#######################"
           echo "Image Tags:"
           cat /steps/tags.lst
