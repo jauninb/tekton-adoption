@@ -174,15 +174,15 @@ spec:
           echo "Full Image URLs:"
           cat /steps/tags.lst
           echo "#######################"
-          BUILDKIT_IMAGE_NAMES=""
+          BUILDKIT_IMAGE_NAMES=$(cat /steps/tags.lst | sed 's/\n/,/g')
+          echo "Buildkit Image names: $BUILDKIT_IMAGE_NAMES"
 
           buildctl-daemonless.sh build \
             --progress=plain \
             --frontend=dockerfile.v0 \
             --opt filename=$(inputs.params.dockerfile) \
             --local context=/artifacts/$(inputs.params.pathToContext) --local dockerfile=/artifacts/$(inputs.params.pathToDockerfile) \
-            --exporter=image --exporter-opt "name=$(outputs.resources.builtImage.url):1.0.0,$(outputs.resources.builtImage.url)" --exporter-opt "push=true" \
-            --output type=image,"name=$(outputs.resources.builtImage.url):1.0.0,$(outputs.resources.builtImage.url)",push=true \
+            --exporter=image --exporter-opt "name=$BUILDKIT_IMAGE_NAMES" --exporter-opt "push=true" \
             --export-cache type=inline \
             --import-cache type=registry,ref=$(outputs.resources.builtImage.url) 2>&1 | tee /steps/build.log
 
