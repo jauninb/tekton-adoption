@@ -36,8 +36,6 @@ spec:
         - name: additionalTagsScript
           value: |
             source /artifacts/build.properties
-            export GIT_BRANCH 
-            export GIT_COMMIT
             # Add a specific tag with branch and commit
             echo "1.0.0-${GIT_BRANCH}-${GIT_COMMIT}"
       resources:          
