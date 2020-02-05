@@ -51,6 +51,9 @@ spec:
           ls -l
           ls -l /cd-config
           env | sort | grep -v -i key
+
+          echo "** toolchain.json content **"
+          cat /cd-config/toolchain.json
           exit 1
       volumeMounts:
         - mountPath: /steps
