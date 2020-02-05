@@ -19,16 +19,8 @@ spec:
     - name: branch2
       description: the branch for the second git repo
       default: master
-    - name: api
-      description: the ibmcloud api
-      default: https://cloud.ibm.com
     - name: apikey
       description: the ibmcloud api key
-    - name: toolchainRegion
-      description: the ibmcloud region containing the toolchain referencing the repository
-      default: us-south
-    - name: toolchainId
-      description: The IBM Cloud Kubernetes cluster region
     - name: containerRegistryToken
       description: Token to connect to IBM Container Registry to pull image
     - name: dockerconfigjson
@@ -36,15 +28,6 @@ spec:
         content of .dockerconfigjson for a secret of type kubernetes.io/dockerconfigjson.
         This can be created using "kubectl create secret --dry-run=true -o yaml docker-registry tekton-adoption --docker-server=${REGISTRY_URL} --docker-password=${TOKEN} --docker-username=iamapikey --docker-email=a@b.com"
   resourcetemplates:
-    # CD context defined as a configmap because it is immutable information
-    - apiVersion: v1
-      kind: ConfigMap
-      metadata:
-        name: cd-config
-      data:
-        API: $(params.api)
-        REGION: $(params.toolchainRegion)
-        TOOLCHAIN_ID: $(params.toolchainId)
     - apiVersion: v1
       kind: Secret
       metadata:
