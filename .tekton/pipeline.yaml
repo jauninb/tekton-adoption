@@ -50,6 +50,10 @@ spec:
           value: $(params.pipeline-pvc)
         - name: scanReportFile
           value: 'app-image-va-report.json'
+        - name: maxIteration
+          value: '5'
+        - name: sleepTime
+          value: '3'
       resources:          
         inputs:
           - name: image
