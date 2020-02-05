@@ -54,7 +54,7 @@ spec:
           TOOLCHAIN_RESOURCE_GROUP_ID=$(jq -r 'select(.container.type=="resource_group_id") | .container.guid' /cd-config/toolchain.json)
           echo "Toolchain id is $TOOLCHAIN_ID"
           echo "Toolchain region is $TOOLCHAIN_REGION"
-          echo "Toolchain resource group id is $TOOLCHAIN_REGION"
+          echo "Toolchain resource group id is $TOOLCHAIN_RESOURCE_GROUP_ID"
           #####################################
           ibmcloud config --check-version false
           ibmcloud login -a $(inputs.params.ibmcloudApi) -r $TOOLCHAIN_REGION --apikey $API_KEY
