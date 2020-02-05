@@ -58,7 +58,7 @@ spec:
           TOOLCHAIN_REGION=$(jq -r '.region_id' /cd-config/toolchain.json | awk -F: '{print $3}')
           echo "Toolchain id is $TOOLCHAIN_ID"
           echo "Toolchain region is $TOOLCHAIN_REGION"
-          exit 1
+          #exit 1
       volumeMounts:
         - mountPath: /steps
           name: steps-volume
