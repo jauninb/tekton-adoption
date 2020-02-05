@@ -54,6 +54,8 @@ spec:
           value: '5'
         - name: sleepTime
           value: '3'
+        - name: failOnScannedIssues          
+          value: 'false'
       resources:          
         inputs:
           - name: image
