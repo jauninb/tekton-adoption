@@ -50,8 +50,15 @@ spec:
           env | sort | grep -v -i key
 
           echo "Kubernetes Namespace: $NAMESPACE"
-          kubectl auth can-i get pipelineresources.tekton.dev
+          if kubectl auth can-i get pipelineresources.tekton.dev; then
+            echo "I can access pipelineresources.tekton.dev"
+          else
+            echo "I can not access pipelineresources.tekton.dev"
+          fi
           #kubectl get all -n${NAMESPACE}
+
+          echo "** kubeconfig content **"
+          cat /workspace/cluster/kubeconfig
 
           echo "** toolchain.json content **"
           cat /cd-config/toolchain.json
