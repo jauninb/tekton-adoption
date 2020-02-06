@@ -77,6 +77,8 @@ spec:
         params:
           - name: name
             value: mycluster
+          - name: username
+            value: username
           - name: url
             value: https://to.be.updated
           - name: token
