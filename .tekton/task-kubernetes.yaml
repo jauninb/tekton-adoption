@@ -28,7 +28,8 @@ spec:
       image: ibmcom/pipeline-base-image
       workingDir: $(inputs.params.task-pvc-mountpath)
       command: ["/bin/bash", "-c"]
-      args: $(inputs.params.script)
+      args: 
+        - $(inputs.params.script)
       volumeMounts:
         - mountPath: $(inputs.params.task-pvc-mountpath)
           name: task-volume
