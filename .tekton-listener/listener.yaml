@@ -94,9 +94,9 @@ spec:
         #   - taskName: pipeline-2-containerize-task
         #     serviceAccount: containerize-build-sa
         resources:
-          - name: app-image
-            resourceRef:
-              name: my-very-first-image
+          # - name: app-image
+          #   resourceRef:
+          #     name: my-very-first-image
           - name: target-cluster
             resourceRef:
               name: my-cluster
