@@ -78,7 +78,7 @@ spec:
           - name: name
             value: mycluster
           - name: url
-            value: url
+            value: https://to.be.updated
           - name: token
             value: token
           - name: cadata
