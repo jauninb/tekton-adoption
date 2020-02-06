@@ -20,7 +20,7 @@ spec:
         description: (optional) the ibmcloud region hosting the cluster (if none is found it will default to the toolchain region)
         default: ''
       - name: clusterPipelineResourcesDirectoryFallback
-        description: directory in the task-pvc that will be used as a fallback mechanism to provide the kubeconfig file
+        description: directory in the task-pvc that will be used as a fallback mechanism to store the kubeconfig file
         default: .tekton-cluster-pipeline-resources
     resources:
       - name: cluster

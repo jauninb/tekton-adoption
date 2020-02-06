@@ -33,7 +33,7 @@ spec:
             resource: target-cluster
     - name: pipeline-1-kubectl-task
       taskRef:
-        name: kubernetes-context-execution
+        name: kubernetes-contextual-execution
       params:
         - name: task-pvc
           value: $(params.pipeline-pvc)
