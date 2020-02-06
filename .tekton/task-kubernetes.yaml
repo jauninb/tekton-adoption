@@ -15,6 +15,7 @@ spec:
         description: directory in which the kubeconfig file(s) for clusterPipelineResources are available
         default: /workspace
       - name: script
+        description: the bash snippet to execute within the context of the kubernetes configuration
         default: 'kubectl cluster-info'
     resources:
       - name: cluster
