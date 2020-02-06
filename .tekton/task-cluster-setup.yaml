@@ -13,12 +13,18 @@ spec:
       - name: continuous-delivery-context-secret
         description: name of the configmap containing the continuous delivery pipeline context secrets
         default: cd-secret
+      - name: resourceGroup
+        description: target resource group (name or id) for the ibmcloud login operation
+        default: ''
       - name: clusterRegion
-        description: the ibmcloud region hosting the cluster
-        default: us-south
+        description: the ibmcloud region hosting the cluster (if none is found it will default to the toolchain region)
+        default: ''
       - name: clusterName
         description: the ibmcloud cluster name (default to the cluster pipelineresource name)
         default: ''
+      - name: clusterPipelineResourcesDirectoryFallback
+        description: directory in the task-pvc that will be used as a fallback mechanism to provide the kubeconfig file
+        default: tekton-cluster-pipeline-resources
     resources:
       - name: cluster
         type: cluster
@@ -52,67 +58,52 @@ spec:
           # until https://github.com/tektoncd/pipeline/issues/1836 is fixed
           export HOME="/root"
           ##########################################################################
-
-          # ls -l /
-          # ls -l -R /builder
-          # ls -l -R /workspace
-
-          # env | sort | grep -v -i key
-
-          echo "Kubernetes Namespace: $NAMESPACE"
-          kubectl config set-context --current --namespace=$NAMESPACE
-
-          # Verifying the access to mandatory resources
-          if kubectl auth can-i get pipelineresources.tekton.dev; then
-            echo "I can access pipelineresources.tekton.dev"
-          else
-            echo "Access to pipelineresources.tekton.dev is mandatory"
-            exit 1
-          fi
-          #kubectl get all -n${NAMESPACE}
-
-          echo "** kubeconfig content **"
-          cat /workspace/$(inputs.resources.cluster.name)/kubeconfig
-
-          echo "** toolchain.json content **"
-          cat /cd-config/toolchain.json
-          echo ""
-          echo "****************************"
-          TOOLCHAIN_ID=$(jq -r '.toolchain_guid' /cd-config/toolchain.json)
-          TOOLCHAIN_REGION=$(jq -r '.region_id' /cd-config/toolchain.json | awk -F: '{print $3}')
-          TOOLCHAIN_RESOURCE_GROUP_ID=$(jq -r 'select(.container.type=="resource_group_id") | .container.guid' /cd-config/toolchain.json)
-          echo "Toolchain id is $TOOLCHAIN_ID"
-          echo "Toolchain region is $TOOLCHAIN_REGION"
-          echo "Toolchain resource group id is $TOOLCHAIN_RESOURCE_GROUP_ID"
-          #####################################
           ibmcloud config --check-version false
           ibmcloud login -a $(inputs.params.ibmcloudApi) -r $TOOLCHAIN_REGION --apikey $API_KEY
           if [ "$(inputs.params.clusterRegion)" ]; then
             ibmcloud target -r $(inputs.params.clusterRegion)
+          else 
+            ibmcloud target -r $(jq -r '.region_id' /cd-config/toolchain.json | awk -F: '{print $3}')
           fi
-          ibmcloud cs clusters
-          KUBECONFIG_FILE=$(ibmcloud ks cluster config mycluster --export -s | awk -F= '{print $2}')
-          echo "Processing $KUBECONFIG_FILE"
-          K8S_USER_NAME=$(yq r $KUBECONFIG_FILE users[0].name)
-          K8S_USER_TOKEN=$(yq r $KUBECONFIG_FILE users[0].user.auth-provider.config.id-token)
-          K8S_CLUSTER_URL=$(yq r $KUBECONFIG_FILE clusters[0].cluster.server)
-          CA_PEM_FILE="$(dirname $KUBECONFIG_FILE)/$(yq r $KUBECONFIG_FILE clusters[0].cluster.certificate-authority)"
-          echo "CA_PEM_FILE is $CA_PEM_FILE"
-          K8S_CLUSTER_CADATA=$(base64 -w0 $CA_PEM_FILE)
-          echo "K8S_USER_NAME=$K8S_USER_NAME"
-          echo "K8S_USER_TOKEN=$K8S_USER_TOKEN"
-          echo "K8S_CLUSTER_URL=$K8S_CLUSTER_URL"
-          echo "K8S_CLUSTER_CADATA=$K8S_CLUSTER_CADATA"
+          # Look for the cluster
+          if ibmcloud ks cluster get $(inputs.resources.cluster.name); then
+            KUBECONFIG_FILE=$(ibmcloud ks cluster config $(inputs.resources.cluster.name) --export -s | awk -F= '{print $2}')
+          else 
+            echo "Cluster $(inputs.resources.cluster.name) not found. Accessible clusters are:"
+            ibmcloud ks clusters
+            exit 1
+          fi
+
+          # As PipelineResource Cluster are managed appropriately as input resources
+          # but not as output resources, attempting to update the PipelineResource Cluster
+          # that has been given (using kubeclt patch commands)
+          # Verifying the access to pipeline resources
+          if kubectl auth can-i get pipelineresources.tekton.dev; then
+            echo "Processing $KUBECONFIG_FILE"
+            K8S_USER_NAME=$(yq r $KUBECONFIG_FILE users[0].name)
+            K8S_USER_TOKEN=$(yq r $KUBECONFIG_FILE users[0].user.auth-provider.config.id-token)
+            K8S_CLUSTER_URL=$(yq r $KUBECONFIG_FILE clusters[0].cluster.server)
+            CA_PEM_FILE="$(dirname $KUBECONFIG_FILE)/$(yq r $KUBECONFIG_FILE clusters[0].cluster.certificate-authority)"
+            echo "CA_PEM_FILE is $CA_PEM_FILE"
+            K8S_CLUSTER_CADATA=$(base64 -w0 $CA_PEM_FILE)
+            echo "K8S_USER_NAME=$K8S_USER_NAME"
+            echo "K8S_USER_TOKEN=$K8S_USER_TOKEN"
+            echo "K8S_CLUSTER_URL=$K8S_CLUSTER_URL"
+            echo "K8S_CLUSTER_CADATA=$K8S_CLUSTER_CADATA"
+          else
+            echo "Access to pipelineresources.tekton.dev is required to update Cluser Pipeline Resource accordingly"
+            echo "Falling back to copy of $(basename $KUBECONFIG_FILE) to the pipeline run volume"
+            mkdir -p /artifacts/$(inputs.params.clusterPipelineResourcesDirectoryFallback)/$(inputs.resources.cluster.name)
+            cp $(dirname $KUBECONFIG_FILE)/$(yq r $KUBECONFIG_FILE clusters[0].cluster.certificate-authority) /artifacts/$(inputs.params.clusterPipelineResourcesDirectoryFallback)/$(inputs.resources.cluster.name)
+            cp $KUBECONFIG_FILE /artifacts/$(inputs.params.clusterPipelineResourcesDirectoryFallback)/$(inputs.resources.cluster.name)/kubeconfig
+            echo "Kubeconfig file(s) copied to /artifacts/$(inputs.params.clusterPipelineResourcesDirectoryFallback)/$(inputs.resources.cluster.name)"
+          fi
       volumeMounts:
-        - mountPath: /steps
-          name: steps-volume
         - mountPath: /artifacts
           name: task-volume
         - mountPath: /cd-config
           name: cd-config-volume
   volumes:
-    - name: steps-volume
-      emptyDir: {}
     - name: task-volume
       persistentVolumeClaim:
         claimName: $(inputs.params.task-pvc)

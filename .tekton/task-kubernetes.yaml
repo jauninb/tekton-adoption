@@ -17,11 +17,14 @@ spec:
       command: ["/bin/bash", "-c"]
       args:
         - |
+          ls -l /artifacts/tekton-cluster-pipeline-resources/$(inputs.resources.cluster.name)
           echo "** kubeconfig content **"
-          cat /workspace/$(inputs.resources.cluster.name)/kubeconfig
+          export KUBECONFIG=/artifacts/tekton-cluster-pipeline-resources/$(inputs.resources.cluster.name)/kubeconfig
+          cat $KUBECONFIG
+
+          echo "List K8S ns"
+          kubectl get ns
       volumeMounts:
-        - mountPath: /steps
-          name: steps-volume
         - mountPath: /artifacts
           name: task-volume
         - mountPath: /cd-config
