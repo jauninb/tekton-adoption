@@ -48,7 +48,8 @@ spec:
           set -e -o pipefail
           ls -l /
           ls -l -R /builder
-          
+          ls -l -R /workspace
+
           env | sort | grep -v -i key
 
           echo "Kubernetes Namespace: $NAMESPACE"
