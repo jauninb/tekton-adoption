@@ -61,7 +61,7 @@ spec:
           #kubectl get all -n${NAMESPACE}
 
           echo "** kubeconfig content **"
-          cat /workspace/cluster/kubeconfig
+          cat /workspace/$(inputs.resources.cluster.name)/kubeconfig
 
           echo "** toolchain.json content **"
           cat /cd-config/toolchain.json
