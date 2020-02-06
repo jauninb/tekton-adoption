@@ -14,11 +14,8 @@ spec:
       - name: clusterPipelineResourcesDirectory
         description: directory in which the kubeconfig file(s) for clusterPipelineResources are available
         default: /workspace
-      - name: commands
-        default: | 
-            kubectl cluster-info
-            echo "List K8S namespaces"
-            kubectl get ns
+      - name: script
+        default: 'kubectl cluster-info'
     resources:
       - name: cluster
         type: cluster
@@ -27,11 +24,11 @@ spec:
       - name: KUBECONFIG
         value: $(inputs.params.clusterPipelineResourcesDirectory)/$(inputs.resources.cluster.name)/kubeconfig
   steps:
-    - name: dosomething
+    - name: execute
       image: ibmcom/pipeline-base-image
       workingDir: $(inputs.params.task-pvc-mountpath)
       command: ["/bin/bash", "-c"]
-      args: $(inputs.params.commands)
+      args: $(inputs.params.script)
       volumeMounts:
         - mountPath: $(inputs.params.task-pvc-mountpath)
           name: task-volume
