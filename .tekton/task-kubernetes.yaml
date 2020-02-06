@@ -15,12 +15,10 @@ spec:
         description: directory in which the kubeconfig file(s) for clusterPipelineResources are available
         default: /workspace
       - name: commands
-        default:
-          - | 
+        default: | 
+            kubectl cluster-info
             echo "List K8S namespaces"
             kubectl get ns
-          - |
-            kubectl cluster-info
     resources:
       - name: cluster
         type: cluster
