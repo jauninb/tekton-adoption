@@ -6,10 +6,19 @@ spec:
   inputs:
     params:
       - name: task-pvc
-        description: the task pvc - this is the volume where the files (Dockerfile etc..) are expected to be
+        description: the task pvc - this is the volume valid for the lifetime of the pipelinerun
+      - name: clusterPipelineResourcesDirectoryFallback
+        description: directory in the task-pvc that will be used as a fallback mechanism to provide the kubeconfig file
+        default: tekton-cluster-pipeline-resources
     resources:
       - name: cluster
         type: cluster
+  stepTemplate:
+    env:
+      # As Cluster Pipeline Resources are not properly updated after kubernetes cluster setup
+      # use the kubeconfig copy fallback
+      - name: KUBECONFIG
+        value: /artifacts/$(inputs.params.clusterPipelineResourcesDirectoryFallback)/$(inputs.resources.cluster.name)/kubeconfig
   steps:
     - name: dosomething
       image: ibmcom/pipeline-base-image
@@ -17,11 +26,11 @@ spec:
       command: ["/bin/bash", "-c"]
       args:
         - |
-          ls -l /artifacts/tekton-cluster-pipeline-resources/$(inputs.resources.cluster.name)
           echo "** kubeconfig content **"
-          export KUBECONFIG=/artifacts/tekton-cluster-pipeline-resources/$(inputs.resources.cluster.name)/kubeconfig
+          #export KUBECONFIG=/artifacts/tekton-cluster-pipeline-resources/$(inputs.resources.cluster.name)/kubeconfig
+          echo "KUBECONFIG=$KUBECONFIG"
+          ls -l $(basename $KUBECONFIG)
           cat $KUBECONFIG
-
           echo "List K8S ns"
           kubectl get ns
       volumeMounts:
