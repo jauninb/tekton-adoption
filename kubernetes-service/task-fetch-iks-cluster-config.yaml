@@ -75,6 +75,8 @@ spec:
           # but not as output resources, attempting to update the PipelineResource Cluster
           # that has been given (using kubeclt patch commands)
           # Verifying the access to pipeline resources
+          env | sort | grep -v -i key
+          
           if kubectl auth can-i get pipelineresources.tekton.dev; then
             echo "Processing $KUBECONFIG_FILE"
             K8S_USER_NAME=$(yq r $KUBECONFIG_FILE users[0].name)
