@@ -53,18 +53,21 @@ spec:
           export HOME="/root"
           ##########################################################################
 
-          ls -l /
-          ls -l -R /builder
-          ls -l -R /workspace
+          # ls -l /
+          # ls -l -R /builder
+          # ls -l -R /workspace
 
-          env | sort | grep -v -i key
+          # env | sort | grep -v -i key
 
           echo "Kubernetes Namespace: $NAMESPACE"
-          # no current context set kubectl config current-context
+          kubectl config set-context --current --namespace=$NAMESPACE
+
+          # Verifying the access to mandatory resources
           if kubectl auth can-i get pipelineresources.tekton.dev; then
             echo "I can access pipelineresources.tekton.dev"
           else
-            echo "I can not access pipelineresources.tekton.dev"
+            echo "Access to pipelineresources.tekton.dev is mandatory"
+            exit 1
           fi
           #kubectl get all -n${NAMESPACE}
 
