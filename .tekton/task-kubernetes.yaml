@@ -24,7 +24,7 @@ spec:
   steps:
     - name: dosomething
       image: ibmcom/pipeline-base-image
-      workingDir: /artifacts
+      workingDir: $(inputs.params.task-pvc-mountpath)
       command: ["/bin/bash", "-c"]
       args:
         - |
