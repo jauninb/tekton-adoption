@@ -16,6 +16,9 @@ spec:
       - name: clusterRegion
         description: the ibmcloud region hosting the cluster
         default: us-south
+      - name: clusterName
+        description: the cluster name
+        default: mycluster
   stepTemplate:
     env:
       - name: API_KEY
@@ -28,16 +31,10 @@ spec:
       image: ibmcom/pipeline-base-image
       workingDir: /artifacts
       env:
-        - name: HOME
-          value: "/root"
-        # - name: API_KEY
-        #   value: $(inputs.params.apikey)
-        # - name: API
-        #   value: $(inputs.params.api)
-        # - name: REGION
-        #   value: $(inputs.params.toolchainRegion)
-        # - name: TOOLCHAIN_ID
-        #   value: $(inputs.params.toolchainId)
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
       command: ["/bin/bash", "-c"]
       args:
         - |
@@ -46,7 +43,8 @@ spec:
           ls -l /cd-config
           env | sort | grep -v -i key
 
-          kubectl get ns
+          echo "Kubernetes Namespace: $NAMESPACE"
+          kubectl get all -n${NAMESPACE}
 
           echo "** toolchain.json content **"
           cat /cd-config/toolchain.json
