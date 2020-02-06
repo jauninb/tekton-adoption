@@ -84,9 +84,9 @@ spec:
             CA_PEM_FILE="$(dirname $KUBECONFIG_FILE)/$(yq r $KUBECONFIG_FILE clusters[0].cluster.certificate-authority)"
             K8S_CLUSTER_CADATA=$(base64 -w0 $CA_PEM_FILE)
             echo "K8S_USER_NAME=$K8S_USER_NAME"
-            echo "K8S_USER_TOKEN=$K8S_USER_TOKEN"
+            #echo "K8S_USER_TOKEN=$K8S_USER_TOKEN"
             echo "K8S_CLUSTER_URL=$K8S_CLUSTER_URL"
-            echo "K8S_CLUSTER_CADATA=$K8S_CLUSTER_CADATA"
+            #echo "K8S_CLUSTER_CADATA=$K8S_CLUSTER_CADATA"
             # TODO Need to update the Cluster Pipeline Resource with this values
           else
             echo "Access to pipelineresources.tekton.dev is required to update Cluser Pipeline Resource accordingly"
