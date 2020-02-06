@@ -19,6 +19,13 @@ spec:
       - name: clusterName
         description: the cluster name
         default: mycluster
+    resources:
+      - name: cluster
+        type: cluster
+  outputs:
+    resources:
+      - name: cluster
+        type: cluster    
   stepTemplate:
     env:
       - name: API_KEY
@@ -44,7 +51,8 @@ spec:
           env | sort | grep -v -i key
 
           echo "Kubernetes Namespace: $NAMESPACE"
-          kubectl get all -n${NAMESPACE}
+          kubectl can-i get pipelineresources.tekton.dev
+          #kubectl get all -n${NAMESPACE}
 
           echo "** toolchain.json content **"
           cat /cd-config/toolchain.json
