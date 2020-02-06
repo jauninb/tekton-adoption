@@ -45,6 +45,9 @@ spec:
           ls -l
           ls -l /cd-config
           env | sort | grep -v -i key
+
+          kubectl get ns
+
           echo "** toolchain.json content **"
           cat /cd-config/toolchain.json
           echo ""
