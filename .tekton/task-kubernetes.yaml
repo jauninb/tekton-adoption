@@ -29,7 +29,8 @@ spec:
       workingDir: $(inputs.params.task-pvc-mountpath)
       command: ["/bin/bash", "-c"]
       args: 
-        - $(inputs.params.script)
+        - |
+          $(inputs.params.script)
       volumeMounts:
         - mountPath: $(inputs.params.task-pvc-mountpath)
           name: task-volume
