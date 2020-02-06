@@ -18,10 +18,12 @@ spec:
   tasks:
     - name: pipeline-0-setup-task
       taskRef:
-        name: fetch-iks-cluster-context-task
+        name: fetch-iks-cluster-config
       params:
         - name: task-pvc
           value: $(params.pipeline-pvc)
+        - name: clusterPipelineResourcesDirectoryFallback
+          value: .tekton-clusters
       resources:          
         inputs:
           - name: cluster
@@ -31,10 +33,14 @@ spec:
             resource: target-cluster
     - name: pipeline-1-kubectl-task
       taskRef:
-        name: kubernetes-task
+        name: kubernetes-context-execution
       params:
         - name: task-pvc
           value: $(params.pipeline-pvc)
+        - name: task-pvc-mountpath
+          value: /pipelinerun
+        - name: clusterPipelineResourcesDirectory
+          value: /pipelinerun/.tekton-clusters
       resources:          
         inputs:
           - name: cluster
