@@ -9,14 +9,14 @@ spec:
         description: the task pvc - this is the volume valid for the lifetime of the pipelinerun
       - name: clusterPipelineResourcesDirectoryFallback
         description: directory in the task-pvc that will be used as a fallback mechanism to provide the kubeconfig file
-        default: tekton-cluster-pipeline-resources
+        default: .tekton-cluster-pipeline-resources
     resources:
       - name: cluster
         type: cluster
   stepTemplate:
     env:
       # As Cluster Pipeline Resources are not properly updated after kubernetes cluster setup
-      # use the kubeconfig copy fallback
+      # use the kubeconfig copy fallback provided by fetch-iks-cluster-context task
       - name: KUBECONFIG
         value: /artifacts/$(inputs.params.clusterPipelineResourcesDirectoryFallback)/$(inputs.resources.cluster.name)/kubeconfig
   steps:
@@ -39,14 +39,6 @@ spec:
         - mountPath: /cd-config
           name: cd-config-volume
   volumes:
-    - name: steps-volume
-      emptyDir: {}
     - name: task-volume
       persistentVolumeClaim:
         claimName: $(inputs.params.task-pvc)
-    - name: cd-config-volume
-      configMap:
-        name: toolchain
-        items:
-        - key: toolchain.json
-          path: toolchain.json

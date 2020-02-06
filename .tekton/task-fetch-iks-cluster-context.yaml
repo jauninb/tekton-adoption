@@ -1,7 +1,7 @@
 apiVersion: tekton.dev/v1alpha1
 kind: Task
 metadata:
-  name: ibmcloud-cluster-context
+  name: fetch-iks-cluster-context-task
 spec:
   inputs:
     params:
@@ -17,14 +17,11 @@ spec:
         description: target resource group (name or id) for the ibmcloud login operation
         default: ''
       - name: clusterRegion
-        description: the ibmcloud region hosting the cluster (if none is found it will default to the toolchain region)
-        default: ''
-      - name: clusterName
-        description: the ibmcloud cluster name (default to the cluster pipelineresource name)
+        description: (optional) the ibmcloud region hosting the cluster (if none is found it will default to the toolchain region)
         default: ''
       - name: clusterPipelineResourcesDirectoryFallback
         description: directory in the task-pvc that will be used as a fallback mechanism to provide the kubeconfig file
-        default: tekton-cluster-pipeline-resources
+        default: .tekton-cluster-pipeline-resources
     resources:
       - name: cluster
         type: cluster
@@ -84,12 +81,12 @@ spec:
             K8S_USER_TOKEN=$(yq r $KUBECONFIG_FILE users[0].user.auth-provider.config.id-token)
             K8S_CLUSTER_URL=$(yq r $KUBECONFIG_FILE clusters[0].cluster.server)
             CA_PEM_FILE="$(dirname $KUBECONFIG_FILE)/$(yq r $KUBECONFIG_FILE clusters[0].cluster.certificate-authority)"
-            echo "CA_PEM_FILE is $CA_PEM_FILE"
             K8S_CLUSTER_CADATA=$(base64 -w0 $CA_PEM_FILE)
             echo "K8S_USER_NAME=$K8S_USER_NAME"
             echo "K8S_USER_TOKEN=$K8S_USER_TOKEN"
             echo "K8S_CLUSTER_URL=$K8S_CLUSTER_URL"
             echo "K8S_CLUSTER_CADATA=$K8S_CLUSTER_CADATA"
+            # TODO Need to update the Cluster Pipeline Resource with this values
           else
             echo "Access to pipelineresources.tekton.dev is required to update Cluser Pipeline Resource accordingly"
             echo "Falling back to copy of $(basename $KUBECONFIG_FILE) to the pipeline run volume"
