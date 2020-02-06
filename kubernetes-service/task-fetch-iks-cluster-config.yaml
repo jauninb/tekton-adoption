@@ -76,7 +76,7 @@ spec:
           # that has been given (using kubeclt patch commands)
           # Verifying the access to pipeline resources
           # Set a low timeout as this should be quick as same cluster
-          if kubectl --request-timeout='5s' auth can-i get pipelineresources.tekton.dev; then
+          if kubectl --request-timeout='10s' auth can-i get pipelineresources.tekton.dev; then
             echo "Processing $KUBECONFIG_FILE"
             K8S_USER_NAME=$(yq r $KUBECONFIG_FILE users[0].name)
             K8S_USER_TOKEN=$(yq r $KUBECONFIG_FILE users[0].user.auth-provider.config.id-token)
