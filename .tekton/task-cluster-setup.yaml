@@ -47,11 +47,10 @@ spec:
         - |
           set -e -o pipefail
           ls -l
-          ls -l /cd-config
           env | sort | grep -v -i key
 
           echo "Kubernetes Namespace: $NAMESPACE"
-          kubectl can-i get pipelineresources.tekton.dev
+          kubectl auth can-i get pipelineresources.tekton.dev
           #kubectl get all -n${NAMESPACE}
 
           echo "** toolchain.json content **"
