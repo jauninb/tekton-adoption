@@ -17,8 +17,8 @@ spec:
         description: the ibmcloud region hosting the cluster
         default: us-south
       - name: clusterName
-        description: the cluster name
-        default: mycluster
+        description: the ibmcloud cluster name (default to the cluster pipelineresource name)
+        default: ''
     resources:
       - name: cluster
         type: cluster
@@ -53,6 +53,7 @@ spec:
           env | sort | grep -v -i key
 
           echo "Kubernetes Namespace: $NAMESPACE"
+          kubectl config current-context
           if kubectl auth can-i get pipelineresources.tekton.dev; then
             echo "I can access pipelineresources.tekton.dev"
           else
@@ -76,12 +77,22 @@ spec:
           #####################################
           ibmcloud config --check-version false
           ibmcloud login -a $(inputs.params.ibmcloudApi) -r $TOOLCHAIN_REGION --apikey $API_KEY
-          TOKEN=$(ibmcloud iam oauth-tokens --output JSON | jq -r '.iam_token')
-          if [ -z "$TOKEN" ]; then
-            echo "No IAM token found"
-            exit 1
+          if [ "$(inputs.params.clusterRegion)" ]; then
+            ibmcloud target -r $(inputs.params.clusterRegion)
           fi
-          #exit 1
+          ibmcloud cs clusters
+          KUBECONFIG_FILE=$(ibmcloud ks cluster config mycluster --export -s | awk -F= '{print $2}')
+          echo "Processing $KUBECONFIG_FILE"
+          K8S_USER_NAME=$(yq r $KUBECONFIG_FILE users[0].name)
+          K8S_USER_TOKEN=$(yq r $KUBECONFIG_FILE users[0].user.auth-provider.config.id-token)
+          K8S_CLUSTER_URL=$(yq r $KUBECONFIG_FILE clusters[0].cluster.server)
+          CA_PEM_FILE="$(dirname $KUBECONFIG_FILE)/$(yq r $KUBECONFIG_FILE clusters[0].cluster.certificate-authority)"
+          echo "CA_PEM_FILE is $CA_PEM_FILE"
+          K8S_CLUSTER_CADATA=$(base64 -w0 $CA_PEM_FILE)
+          echo "K8S_USER_NAME=$K8S_USER_NAME"
+          echo "K8S_USER_TOKEN=$K8S_USER_TOKEN"
+          echo "K8S_CLUSTER_URL=$K8S_CLUSTER_URL"
+          echo "K8S_CLUSTER_CADATA=$K8S_CLUSTER_CADATA"
       volumeMounts:
         - mountPath: /steps
           name: steps-volume
