@@ -46,7 +46,9 @@ spec:
       args:
         - |
           set -e -o pipefail
-          ls -l
+          ls -l /
+          ls -l -R /builder
+          
           env | sort | grep -v -i key
 
           echo "Kubernetes Namespace: $NAMESPACE"
