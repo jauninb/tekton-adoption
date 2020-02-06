@@ -29,7 +29,18 @@ spec:
         outputs:
           - name: cluster
             resource: target-cluster
-
+    - name: pipeline-1-kubectl-task
+      taskRef:
+        name: kubernetes-task
+      params:
+        - name: task-pvc
+          value: $(params.pipeline-pvc)
+      resources:          
+        inputs:
+          - name: cluster
+            resource: target-cluster
+            from:
+              - pipeline-0-setup-task
     # - name: pipeline-1-clone-task
     #   runAfter: [pipeline-0-setup-task]
     #   taskRef:
