@@ -9,16 +9,23 @@ spec:
         description: the task pvc - this is the volume valid for the lifetime of the pipelinerun
       - name: task-pvc-mountpath
         default: /artifacts
+      # As Cluster Pipeline Resources are not properly updated after kubernetes cluster setup
+      # Allow user to specifiy kubeconfig copy fallback provided by fetch-iks-cluster-context task
       - name: clusterPipelineResourcesDirectory
         description: directory in which the kubeconfig file(s) for clusterPipelineResources are available
         default: /workspace
+      - name: commands
+        default:
+          - | 
+            echo "List K8S namespaces"
+            kubectl get ns
+          - |
+            kubectl cluster-info
     resources:
       - name: cluster
         type: cluster
   stepTemplate:
     env:
-      # As Cluster Pipeline Resources are not properly updated after kubernetes cluster setup
-      # use the kubeconfig copy fallback provided by fetch-iks-cluster-context task
       - name: KUBECONFIG
         value: $(inputs.params.clusterPipelineResourcesDirectory)/$(inputs.resources.cluster.name)/kubeconfig
   steps:
@@ -26,10 +33,7 @@ spec:
       image: ibmcom/pipeline-base-image
       workingDir: $(inputs.params.task-pvc-mountpath)
       command: ["/bin/bash", "-c"]
-      args:
-        - |
-          echo "List K8S ns"
-          kubectl get ns
+      args: $(inputs.params.commands)
       volumeMounts:
         - mountPath: $(inputs.params.task-pvc-mountpath)
           name: task-volume
