@@ -53,7 +53,7 @@ spec:
           env | sort | grep -v -i key
 
           echo "Kubernetes Namespace: $NAMESPACE"
-          kubectl config current-context
+          # no current context set kubectl config current-context
           if kubectl auth can-i get pipelineresources.tekton.dev; then
             echo "I can access pipelineresources.tekton.dev"
           else
