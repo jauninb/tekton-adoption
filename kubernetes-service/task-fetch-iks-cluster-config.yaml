@@ -22,9 +22,9 @@ spec:
       - name: kubeAPIServerAccessible
         description: |
           indicates if the kubeAPIServer is exposed which is not the case for IBM Cloud Public Shared Workers (Calico network policy).
-          If true, the task is trying to update the Cluster Pipeline Resources definition with the appropriate informations
-          When false, the fallback mechanism (copy file(s)) is used.
-        default: false
+          If 'true', the task is trying to update the Cluster Pipeline Resources definition with the appropriate informations
+          When 'false', the fallback mechanism (copy file(s)) is used.
+        default: 'false'
       - name: clusterPipelineResourcesDirectoryFallback
         description: directory in the task-pvc that will be used as a fallback mechanism to store the kubeconfig file
         default: .tekton-cluster-pipeline-resources
