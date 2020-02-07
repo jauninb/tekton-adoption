@@ -85,7 +85,7 @@ spec:
           # Verifying the access to pipeline resources
           updateClusterPipelineResource="false"
           if [ "$(inputs.params.kubeAPIServerAccessible)" == "true" ]; then
-            if kubectl auth can-i get pipelineresources.tekton.dev; then
+            if kubectl auth can-i get pipelineresources.tekton.dev > /dev/null 2>&1; then
               updateClusterPipelineResource="true"
             fi
           fi
