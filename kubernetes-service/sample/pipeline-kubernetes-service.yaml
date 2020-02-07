@@ -37,6 +37,8 @@ spec:
           value: /pipelinerun/.tekton-clusters
         - name: script
           value: |
+            echo "** Here is the kubectl version:"
+            kubectl version
             echo "** Here is the kubectl cluster-info:"
             kubectl cluster-info
             echo "I am listing the namespaces updated"

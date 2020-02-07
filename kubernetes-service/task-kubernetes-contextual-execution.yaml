@@ -16,7 +16,7 @@ spec:
         default: /workspace
       - name: script
         description: the bash snippet to execute within the context of the kubernetes configuration
-        default: 'kubectl cluster-info'
+        default: 'kubectl version'
     resources:
       - name: cluster
         type: cluster
