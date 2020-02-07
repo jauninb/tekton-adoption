@@ -83,7 +83,13 @@ spec:
           # but not as output resources, attempting to update the PipelineResource Cluster
           # that has been given (using kubeclt patch commands)
           # Verifying the access to pipeline resources
-          if [ "$(inputs.params.kubeAPIServerAccessible)" == "true" ] && [ kubectl auth can-i get pipelineresources.tekton.dev ]; then
+          updateClusterPipelineResource="false"
+          if [ "$(inputs.params.kubeAPIServerAccessible)" == "true" ]; then
+            if kubectl auth can-i get pipelineresources.tekton.dev; then
+              updateClusterPipelineResource="true"
+            fi
+          fi
+          if [ "$updateClusterPipelineResource" == "true" ]; then
             echo "Processing $KUBECONFIG_FILE"
             K8S_USER_NAME=$(yq r $KUBECONFIG_FILE users[0].name)
             K8S_USER_TOKEN=$(yq r $KUBECONFIG_FILE users[0].user.auth-provider.config.id-token)
