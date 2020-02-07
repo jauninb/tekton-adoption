@@ -38,7 +38,6 @@ spec:
             echo "$KUBECONFIG file is not existing. exiting now..."
             exit 1
           fi
-        - |
           # User-defined snippet/script
           $(inputs.params.script)
       volumeMounts:
