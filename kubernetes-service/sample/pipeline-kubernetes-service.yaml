@@ -17,7 +17,7 @@ spec:
         - name: task-pvc
           value: $(params.pipeline-pvc)
         - name: clusterPipelineResourcesDirectoryFallback
-          value: .tekton-clusters
+          value: .tekton-clusterssss
       resources:          
         inputs:
           - name: cluster
@@ -37,9 +37,9 @@ spec:
           value: /pipelinerun/.tekton-clustersnonono
         - name: script
           value: |
-            echo "Here is the kubectl cluster-info:"
+            echo "Here is the kubectl cluster-info and there is an update:"
             kubectl cluster-info
-            echo "I am listing the namespaces"
+            echo "I am listing the namespaces updated"
             kubectl get namespaces
             echo "Here is the kubectl cluster-info:"
       resources:          
