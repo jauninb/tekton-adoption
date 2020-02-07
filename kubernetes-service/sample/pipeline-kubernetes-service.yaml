@@ -34,7 +34,7 @@ spec:
         - name: task-pvc-mountpath
           value: /pipelinerun
         - name: clusterPipelineResourcesDirectory
-          value: /pipelinerun/.tekton-clusters
+          value: /pipelinerun/.tekton-clusters_
         - name: script
           value: |
             echo "Here is the kubectl cluster-info:"
