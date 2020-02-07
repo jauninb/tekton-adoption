@@ -19,14 +19,22 @@ spec:
       - name: clusterRegion
         description: (optional) the ibmcloud region hosting the cluster (if none is found it will default to the toolchain region)
         default: ''
+      - name: kubeAPIServerAccessible
+        description: |
+          indicates if the kubeAPIServer is exposed which is not the case for IBM Cloud Public Shared Workers (Calico network policy).
+          If true, the task is trying to update the Cluster Pipeline Resources definition with the appropriate informations
+          When false, the fallback mechanism (copy file(s)) is used.
+        default: false
       - name: clusterPipelineResourcesDirectoryFallback
         description: directory in the task-pvc that will be used as a fallback mechanism to store the kubeconfig file
         default: .tekton-cluster-pipeline-resources
     resources:
+      # Will be set as optional when tekton version support it
       - name: cluster
         type: cluster
   outputs:
     resources:
+      # Will be set as optional when tekton version support it
       - name: cluster
         type: cluster    
   stepTemplate:
@@ -71,12 +79,12 @@ spec:
             exit 1
           fi
 
-          # As PipelineResource Cluster are managed appropriately as input resources
+          # PipelineResource Cluster are managed appropriately as input resources
           # but not as output resources, attempting to update the PipelineResource Cluster
           # that has been given (using kubeclt patch commands)
           # Verifying the access to pipeline resources
           # Set a low timeout as this should be quick as same cluster
-          if kubectl --request-timeout='10s' auth can-i get pipelineresources.tekton.dev; then
+          if kubectl auth can-i get pipelineresources.tekton.dev; then
             echo "Processing $KUBECONFIG_FILE"
             K8S_USER_NAME=$(yq r $KUBECONFIG_FILE users[0].name)
             K8S_USER_TOKEN=$(yq r $KUBECONFIG_FILE users[0].user.auth-provider.config.id-token)
