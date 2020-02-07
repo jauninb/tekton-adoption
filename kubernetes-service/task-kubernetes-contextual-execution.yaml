@@ -31,6 +31,15 @@ spec:
       command: ["/bin/bash", "-c"]
       args: 
         - |
+          # Validate KUBECONFIG 
+          if test -f "$KUBECONFIG"; then
+            echo "KUBECONFIG=$KUBECONFIG"
+          else
+            echo "$KUBECONFIG file is not existing. exiting now..."
+            exit 1
+          fi
+        - |
+          # User-defined snippet/script
           $(inputs.params.script)
       volumeMounts:
         - mountPath: $(inputs.params.task-pvc-mountpath)
