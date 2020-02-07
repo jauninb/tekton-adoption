@@ -24,7 +24,7 @@ spec:
           indicates if the kubeAPIServer is exposed which is not the case for IBM Cloud Public Shared Workers (Calico network policy).
           If 'true', the task is trying to update the Cluster Pipeline Resources definition with the appropriate informations
           When 'false', the fallback mechanism (copy file(s)) is used.
-        default: 'true'
+        default: 'false'
       - name: clusterPipelineResourcesDirectoryFallback
         description: directory in the task-pvc that will be used as a fallback mechanism to store the kubeconfig file
         default: .tekton-cluster-pipeline-resources
@@ -90,7 +90,7 @@ spec:
             fi
           fi
           if [ "$updateClusterPipelineResource" == "true" ]; then
-            echo "Processing $KUBECONFIG_FILE"
+            echo "TODO - Processing $KUBECONFIG_FILE"
             K8S_USER_NAME=$(yq r $KUBECONFIG_FILE users[0].name)
             K8S_USER_TOKEN=$(yq r $KUBECONFIG_FILE users[0].user.auth-provider.config.id-token)
             K8S_CLUSTER_URL=$(yq r $KUBECONFIG_FILE clusters[0].cluster.server)
