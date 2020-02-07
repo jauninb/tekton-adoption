@@ -73,9 +73,9 @@ spec:
       spec:
         pipelineRef:
           name: pipeline-kubernetes-service
-        serviceAccounts:
-          - taskName: pipeline-0-setup-task
-            serviceAccount: cluster-pipeline-resource-updater-account
+        # serviceAccounts:
+        #   - taskName: pipeline-0-setup-task
+        #     serviceAccount: cluster-pipeline-resource-updater-account
         resources:
           - name: target-cluster
             resourceRef:
