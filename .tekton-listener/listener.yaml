@@ -122,6 +122,10 @@ spec:
       kind: PipelineRun
       metadata:
         name: pipelinerun-$(uid)
+        labels:
+          myownlabel/bjn: "monlabelamoi"
+        annotations:
+          myownannotation/bjn: "monannotationamoi"
       spec:
         pipelineRef:
           name: pipeline
