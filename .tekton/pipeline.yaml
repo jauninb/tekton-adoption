@@ -18,7 +18,7 @@ spec:
   tasks:
     - name: pipeline-0-setup-task
       taskRef:
-        name: fetch-iks-cluster-config
+        name: ibmcloud-login
       params:
         - name: task-pvc
           value: $(params.pipeline-pvc)
@@ -31,9 +31,9 @@ spec:
         outputs:
           - name: cluster
             resource: target-cluster
-    - name: pipeline-1-kubectl-task
+    - name: pipeline-1-ibmcloud-test
       taskRef:
-        name: kubernetes-contextual-execution
+        name: ibmcloud-login
       params:
         - name: task-pvc
           value: $(params.pipeline-pvc)
@@ -54,52 +54,3 @@ spec:
             resource: target-cluster
             from:
               - pipeline-0-setup-task
-    # - name: pipeline-1-clone-task
-    #   runAfter: [pipeline-0-setup-task]
-    #   taskRef:
-    #     name: clone-repo-task
-    #   params:
-    #     - name: task-pvc
-    #       value: $(params.pipeline-pvc)
-    #     - name: repository
-    #       value: $(params.repository)
-    #     - name: branch
-    #       value: $(params.branch)
-    # - name: pipeline-2-containerize-task
-    #   runAfter: [pipeline-1-clone-task]
-    #   taskRef:
-    #     name: containerize-task
-    #   params:
-    #     - name: task-pvc
-    #       value: $(params.pipeline-pvc)
-    #     # - name: additionalTags
-    #     #   value: '1.0.0-static'
-    #     # - name: additionalTagsScript
-    #     #   value: |
-    #     #     source /artifacts/build.properties
-    #     #     # Add a specific tag with branch and commit
-    #     #     #echo "1.0.0-${GIT_BRANCH}-${GIT_COMMIT}"
-    #   resources:          
-    #     outputs:
-    #       - name: builtImage
-    #         resource: app-image
-    # - name: pipeline-3-va-task
-    #   taskRef:
-    #     name: vulnerability-advisor-task
-    #   params:
-    #     - name: task-pvc
-    #       value: $(params.pipeline-pvc)
-    #     - name: scanReportFile
-    #       value: 'app-image-va-report.json'
-    #     # - name: maxIteration
-    #     #   value: '5'
-    #     # - name: sleepTime
-    #     #   value: '3'
-    #     # - name: failOnScannedIssues          
-    #     #   value: 'false'
-    #   resources:          
-    #     inputs:
-    #       - name: image
-    #         resource: app-image
-    #         from:
-    #           - pipeline-2-containerize-task
