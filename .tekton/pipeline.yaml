@@ -37,17 +37,8 @@ spec:
       params:
         - name: task-pvc
           value: $(params.pipeline-pvc)
-        - name: task-pvc-mountpath
-          value: /pipelinerun
-        - name: clusterPipelineResourcesDirectory
-          value: /pipelinerun/.tekton-clusters
-        - name: script
-          value: |
-            echo "Here is the kubectl cluster-info:"
-            kubectl cluster-info
-            echo "I am listing the namespaces"
-            kubectl get namespaces
-            echo "Here is the kubectl cluster-info:"
+        - name: clusterPipelineResourcesDirectoryFallback
+          value: .tekton-clusters
       resources:          
         inputs:
           - name: cluster
