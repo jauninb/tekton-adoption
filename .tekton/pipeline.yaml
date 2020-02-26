@@ -45,3 +45,6 @@ spec:
             resource: target-cluster
             from:
               - pipeline-0-setup-task
+        outputs:
+          - name: cluster
+            resource: target-cluster
