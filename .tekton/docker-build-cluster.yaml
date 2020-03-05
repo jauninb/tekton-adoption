@@ -143,7 +143,7 @@ spec:
         #   port: 2375
         exec:
           command: ["ls", "/cluster/build/docker/up"]
-        # initialDelaySeconds: 10
+        initialDelaySeconds: 3
         periodSeconds: 3
         failureThreshold: 10
   volumes:
