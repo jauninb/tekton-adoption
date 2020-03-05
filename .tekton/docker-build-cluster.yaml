@@ -47,6 +47,10 @@ spec:
     - name: setup-docker-build-cluster
       image: ibmcom/pipeline-base-image
       env:
+        - name: THE_POD_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP      
         - name: IBM_CLOUD_API_KEY
           valueFrom:
             secretKeyRef:
@@ -115,8 +119,11 @@ spec:
 
           # Use port-forward to make the pod/port locally accessible
           # Be sure to use a running POD (not an evicted one)
-          kubectl --namespace "$BUILD_CLUSTER_NAMESPACE" get pods 
-          kubectl --namespace "$BUILD_CLUSTER_NAMESPACE" port-forward $(kubectl --namespace "$BUILD_CLUSTER_NAMESPACE" get pods | grep docker | grep -i running | awk '{print $1;}') 2375:2375
+          kubectl --namespace "$BUILD_CLUSTER_NAMESPACE" get pods           
+          kubectl --namespace "$BUILD_CLUSTER_NAMESPACE" port-forward \
+            --adress=localhost,${THE_POD_IP}
+            $(kubectl --namespace "$BUILD_CLUSTER_NAMESPACE" get pods | grep docker | grep -i running | awk '{print $1;}') \
+            2375:2375
 
           # kubectl --namespace "$BUILD_CLUSTER_NAMESPACE" port-forward $(kubectl --namespace "$BUILD_CLUSTER_NAMESPACE" get pods | grep docker | grep -i running | awk '{print $1;}') 2375:2375 > /dev/null 2>&1 &
 
