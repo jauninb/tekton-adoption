@@ -35,6 +35,7 @@ spec:
           set -e -o pipefail
           export DOCKER_HOST='tcp://localhost:2375'
           docker version
+          docker images
       volumeMounts:
         - mountPath: /artifacts
           name: task-volume
@@ -128,7 +129,7 @@ spec:
 
           echo "build cluster seems up & running and port-forward is ok" | tee /cluster/build/docker/up
           ls -l /cluster/build/docker
-          # Now time to keep this sidecar container up & running ?
+          # Now time to keep this sidecar container up & running
           # sleep infinity
           trap : TERM INT; sleep infinity & wait
       volumeMounts:
@@ -140,12 +141,11 @@ spec:
       readinessProbe:
         # tcpSocket:
         #   port: 2375
-        # initialDelaySeconds: 10
-        # periodSeconds: 10
-        # failureThreshold: 12
-        periodSeconds: 1
         exec:
           command: ["ls", "/cluster/build/docker/up"]
+        # initialDelaySeconds: 10
+        periodSeconds: 3
+        failureThreshold: 10
   volumes:
     - name: task-volume
       persistentVolumeClaim:
