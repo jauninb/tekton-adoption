@@ -109,10 +109,37 @@ spec:
           fi
 
           # Ensure there is a Docker server on the build cluster
-          if ! kubectl --namespace "$BUILD_CLUSTER_NAMESPACE" rollout status -w deployment/docker; then
+          if ! kubectl --namespace "$BUILD_CLUSTER_NAMESPACE" rollout status -w deployment/docker-dind; then
+            echo "Preparing Docker server deployment"
+            cat > /sidecar-only/docker-dind-deployment.yaml << EOF
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            labels:
+              run: docker
+            name: docker-dind
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                run: docker
+            template:
+              metadata:
+                labels:
+                  run: docker
+              spec:
+                containers:
+                - name: docker
+                  image: docker:dind
+                  env:
+                  - name: DOCKER_TLS_CERTDIR
+                    value: ''
+                  securityContext:
+                    privileged: true
+          EOF
             echo "Installing Docker Server into build cluster..."
-            kubectl --namespace "$BUILD_CLUSTER_NAMESPACE" run docker --image=docker:dind --overrides='{ "apiVersion": "apps/v1", "spec": { "template": { "spec": {"containers": [ { "name": "docker", "image": "docker:dind", "env": [ {"name": "DOCKER_TLS_CERTDIR", "value":""} ] "securityContext": { "privileged": true } } ] } } } }'
-            kubectl --namespace "$BUILD_CLUSTER_NAMESPACE" rollout status -w deployment/docker
+            kubectl --namespace "$BUILD_CLUSTER_NAMESPACE" apply -f /sidecar-only/docker-dind-deployment.yaml
+            kubectl --namespace "$BUILD_CLUSTER_NAMESPACE" rollout status -w deployment/docker-dind
           fi
 
           # Use port-forward to make the pod/port locally accessible
@@ -127,6 +154,8 @@ spec:
       volumeMounts:
         - mountPath: /cd-config
           name: cd-config-volume
+        - mountPath: /sidecar-only
+          name: sidecar-volume
       # Wait for the port foward to be available
       readinessProbe:
         tcpSocket:
