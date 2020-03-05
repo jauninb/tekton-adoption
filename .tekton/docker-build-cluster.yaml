@@ -40,6 +40,8 @@ spec:
           name: task-volume
         - mountPath: /cd-config
           name: cd-config-volume
+        - mountPath: /cluster/build/docker
+          name: sidecar-volume          
   sidecars:
     - name: setup-docker-build-cluster
       image: ibmcom/pipeline-base-image
@@ -125,11 +127,10 @@ spec:
           done
 
           echo "build cluster seems up & running and port-forward is ok" | tee /cluster/build/docker/up
+          ls -l /cluster/build/docker
           # Now time to keep this sidecar container up & running ?
           # sleep infinity
-          # trap : TERM INT; sleep infinity & wait
-          ls -l /cluster/build/docker
-
+          trap : TERM INT; sleep infinity & wait
       volumeMounts:
         - mountPath: /cd-config
           name: cd-config-volume
