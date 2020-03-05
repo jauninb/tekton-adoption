@@ -115,8 +115,13 @@ spec:
           kubectl --namespace "$BUILD_CLUSTER_NAMESPACE" get pods 
           kubectl --namespace "$BUILD_CLUSTER_NAMESPACE" port-forward $(kubectl --namespace "$BUILD_CLUSTER_NAMESPACE" get pods | grep docker | grep -i running | awk '{print $1;}') 2375:2375 > /dev/null 2>&1 &
 
-          # Now time to keep this sidecar container up & running 
-          sleep infinity
+          while ! nc -z localhost 2375; do
+            echo "sleeping 3s"
+            sleep 3
+          done
+
+          # Now time to keep this sidecar container up & running ?
+          # sleep infinity
 
       volumeMounts:
         - mountPath: /cd-config
