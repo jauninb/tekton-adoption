@@ -116,6 +116,8 @@ spec:
           fi
 
           # Use port-forward to make the pod/port locally accessible
+          # We need to include the POD IP in the addresses because the readinessProbe will try to open
+          # a socket on <POD_IP>:PORT
           # Be sure to use a running POD (not an evicted one)
           kubectl --namespace "$BUILD_CLUSTER_NAMESPACE" get pods           
           kubectl --namespace "$BUILD_CLUSTER_NAMESPACE" port-forward \
