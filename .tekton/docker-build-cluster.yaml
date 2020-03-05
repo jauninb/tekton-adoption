@@ -116,22 +116,24 @@ spec:
           # Use port-forward to make the pod/port locally accessible
           # Be sure to use a running POD (not an evicted one)
           kubectl --namespace "$BUILD_CLUSTER_NAMESPACE" get pods 
-          kubectl --namespace "$BUILD_CLUSTER_NAMESPACE" port-forward $(kubectl --namespace "$BUILD_CLUSTER_NAMESPACE" get pods | grep docker | grep -i running | awk '{print $1;}') 2375:2375 > /dev/null 2>&1 &
+          kubectl --namespace "$BUILD_CLUSTER_NAMESPACE" port-forward $(kubectl --namespace "$BUILD_CLUSTER_NAMESPACE" get pods | grep docker | grep -i running | awk '{print $1;}') 2375:2375
 
-          sudo apt-get install -y netcat
+          # kubectl --namespace "$BUILD_CLUSTER_NAMESPACE" port-forward $(kubectl --namespace "$BUILD_CLUSTER_NAMESPACE" get pods | grep docker | grep -i running | awk '{print $1;}') 2375:2375 > /dev/null 2>&1 &
+
+          # sudo apt-get install -y netcat
           
-          which nc
+          # which nc
 
-          while ! nc -z localhost 2375; do
-            echo "sleeping 3s"
-            sleep 3
-          done
+          # while ! nc -z localhost 2375; do
+          #   echo "sleeping 3s"
+          #   sleep 3
+          # done
 
-          echo "build cluster seems up & running and port-forward is ok" | tee /cluster/build/docker/up
-          ls -l /cluster/build/docker
-          # Now time to keep this sidecar container up & running
-          # sleep infinity
-          trap : TERM INT; sleep infinity & wait
+          # echo "build cluster seems up & running and port-forward is ok" | tee /cluster/build/docker/up
+          # ls -l /cluster/build/docker
+          # # Now time to keep this sidecar container up & running
+          # # sleep infinity
+          # trap : TERM INT; sleep infinity & wait
       volumeMounts:
         - mountPath: /cd-config
           name: cd-config-volume
@@ -139,10 +141,10 @@ spec:
           name: sidecar-volume          
       # Wait for the port foward to be available
       readinessProbe:
-        # tcpSocket:
-        #   port: 2375
-        exec:
-          command: ["ls", "/cluster/build/docker/up"]
+        tcpSocket:
+          port: 2375
+        # exec:
+        #   command: ["ls", "/cluster/build/docker/up"]
         initialDelaySeconds: 3
         periodSeconds: 3
         failureThreshold: 10
