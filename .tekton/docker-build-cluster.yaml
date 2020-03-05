@@ -121,7 +121,7 @@ spec:
           # Be sure to use a running POD (not an evicted one)
           kubectl --namespace "$BUILD_CLUSTER_NAMESPACE" get pods           
           kubectl --namespace "$BUILD_CLUSTER_NAMESPACE" port-forward \
-            --adress=localhost,${THE_POD_IP}
+            --adress=localhost,${THE_POD_IP} \
             $(kubectl --namespace "$BUILD_CLUSTER_NAMESPACE" get pods | grep docker | grep -i running | awk '{print $1;}') \
             2375:2375
 
