@@ -124,8 +124,10 @@ spec:
             sleep 3
           done
 
+          echo "build cluster seems up & running and port-forward is ok"
           # Now time to keep this sidecar container up & running ?
           # sleep infinity
+          trap : TERM INT; sleep infinity & wait
 
       volumeMounts:
         - mountPath: /cd-config
