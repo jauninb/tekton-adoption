@@ -50,7 +50,7 @@ spec:
     #         resource: target-cluster
     - name: pipeline-2-docker-task
       taskRef:
-        name: execute-in-docker-dind-cluster-task
+        name: execute-in-dind-cluster-task
       params:
         - name: task-pvc
           value: $(params.pipeline-pvc)
