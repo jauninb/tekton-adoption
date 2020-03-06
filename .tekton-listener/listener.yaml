@@ -120,6 +120,8 @@ spec:
       spec:
         type: cluster
         params:
+          - name: name
+            value: mycluster
           - name: username
             value: username
           - name: url
