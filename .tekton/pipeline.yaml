@@ -16,21 +16,21 @@ spec:
   - name: target-cluster
     type: cluster
   tasks:
-    # - name: pipeline-0-setup-task
-    #   taskRef:
-    #     name: ibmcloud-login
-    #   params:
-    #     - name: task-pvc
-    #       value: $(params.pipeline-pvc)
-    #     - name: clusterPipelineResourcesDirectoryFallback
-    #       value: .tekton-clusters
-    #   resources:          
-    #     inputs:
-    #       - name: cluster
-    #         resource: target-cluster
-    #     outputs:
-    #       - name: cluster
-    #         resource: target-cluster
+    - name: pipeline-0-setup-task
+      taskRef:
+        name: ibmcloud-login
+      params:
+        - name: task-pvc
+          value: $(params.pipeline-pvc)
+        - name: clusterPipelineResourcesDirectoryFallback
+          value: .tekton-clusters
+      resources:          
+        inputs:
+          - name: cluster
+            resource: target-cluster
+        outputs:
+          - name: cluster
+            resource: target-cluster
     # - name: pipeline-1-ibmcloud-test
     #   taskRef:
     #     name: ibmcloud-login
@@ -48,13 +48,13 @@ spec:
     #     outputs:
     #       - name: cluster
     #         resource: target-cluster
-    - name: pipeline-2-docker-task
-      taskRef:
-        name: execute-in-docker-dind-cluster
-      params:
-        - name: task-pvc
-          value: $(params.pipeline-pvc)
-      resources:          
-        inputs:
-          - name: cluster
-            resource: target-cluster
+    # - name: pipeline-2-docker-task
+    #   taskRef:
+    #     name: execute-in-docker-dind-cluster
+    #   params:
+    #     - name: task-pvc
+    #       value: $(params.pipeline-pvc)
+    #   resources:          
+    #     inputs:
+    #       - name: cluster
+    #         resource: target-cluster
