@@ -143,9 +143,9 @@ spec:
           - taskName: pipeline-0-setup-task
             serviceAccount: cluster-pipeline-resource-updater-account
         resources:
-          # - name: app-image
-          #   resourceRef:
-          #     name: my-very-first-image
+          - name: app-image
+            resourceRef:
+              name: my-very-first-image
           - name: target-cluster
             resourceRef:
               name: mycluster
