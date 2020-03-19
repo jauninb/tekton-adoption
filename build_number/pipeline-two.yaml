@@ -1,0 +1,14 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Pipeline
+metadata:
+  name: pipeline-two
+spec:
+  params:
+    - name: param1
+  tasks:
+    - name: simple-task
+      taskRef:
+        name: simple-task
+      params:
+        - name: param1
+          value: $(params.param1)

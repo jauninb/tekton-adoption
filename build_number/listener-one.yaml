@@ -1,0 +1,38 @@
+apiVersion: tekton.dev/v1alpha1
+kind: TriggerTemplate
+metadata:
+  name: trigger-template-one
+spec:
+  params:
+    - name: param1
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1alpha1
+      kind: PipelineRun
+      metadata:
+        name: pipelineone-run-$(uid)
+      spec:
+        pipelineRef:
+          name: pipeline-one
+        params:
+          - name: param1
+            value: $(params.param1)
+---
+apiVersion: tekton.dev/v1alpha1
+kind: TriggerBinding
+metadata:
+  name: trigger-binding-one
+spec:
+  params:
+    - name: param1
+      value: "pipeline-one"
+---
+apiVersion: tekton.dev/v1alpha1
+kind: EventListener
+metadata:
+  name: event-listener-one
+spec:
+  triggers:
+    - binding:
+        name: trigger-binding-one
+      template:
+        name: trigger-template-one
