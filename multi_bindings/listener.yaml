@@ -20,11 +20,29 @@ spec:
 apiVersion: tekton.dev/v1alpha1
 kind: TriggerBinding
 metadata:
-  name: trigger-binding-one
+  name: trigger-binding-1
 spec:
   params:
     - name: param1
-      value: "tb-one"
+      value: "tb-1"
+---
+apiVersion: tekton.dev/v1alpha1
+kind: TriggerBinding
+metadata:
+  name: trigger-binding-2
+spec:
+  params:
+    - name: param1
+      value: "tb-2"
+---
+apiVersion: tekton.dev/v1alpha1
+kind: TriggerBinding
+metadata:
+  name: trigger-binding-3
+spec:
+  params:
+    - name: param1
+      value: "tb-3"
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: EventListener
@@ -33,6 +51,8 @@ metadata:
 spec:
   triggers:
     - bindings:
-        - name: trigger-binding-one
+        - name: trigger-binding-1
+        - name: trigger-binding-2
+        - name: trigger-binding-3
       template:
         name: trigger-template
