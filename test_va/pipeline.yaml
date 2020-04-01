@@ -3,6 +3,9 @@ kind: Pipeline
 metadata:
   name: pipeline
 spec:
+  params:
+    - name: branch
+      description: the branch for the git repo
   resources:
   - name: app-image
     type: image

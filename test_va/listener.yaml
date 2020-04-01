@@ -8,6 +8,8 @@ spec:
       description: the ibmcloud api key
     - name: imageUrl
       description: The image url in your container registry
+    - name: imageDigest
+    - name: branch
   resourcetemplates:
     # CD secret to provide API_KEY to access toolchain information
     - apiVersion: v1
@@ -51,10 +53,22 @@ spec:
           - name: app-image
             resourceRef:
               name: image-to-build
+        params:
+          - name: branch
+            value: $(params.branch)
         workspaces:
         - name: pipeline-ws
           persistentVolumeClaim:
             claimName: containerize-$(uid)-pvc
+---
+apiVersion: tekton.dev/v1alpha1
+kind: TriggerBinding
+metadata:
+  name: trigger-binding
+spec:
+  params:
+    - name: branch
+      value: "master"
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: EventListener
@@ -62,5 +76,7 @@ metadata:
   name: event-listener-va-test
 spec:
   triggers:
-    - template:
+    - binding:
+        name: trigger-binding
+      template:
         name: trigger-template
