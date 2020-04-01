@@ -18,10 +18,10 @@ spec:
       params:
         - name: scanReportFile
           value: 'app-image-va-report.json'
-        # - name: maxIteration
-        #   value: '5'
-        # - name: sleepTime
-        #   value: '3'
+        - name: maxIteration
+          value: '5'
+        - name: sleepTime
+          value: '3'
         # - name: failOnScannedIssues
         #   value: 'false'
       workspaces:
