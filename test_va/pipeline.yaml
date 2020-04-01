@@ -1,0 +1,30 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Pipeline
+metadata:
+  name: pipeline
+spec:
+  resources:
+  - name: app-image
+    type: image
+  workspaces:
+    - name: pipeline-ws
+  tasks:
+    - name: pipeline-va-task
+      taskRef:
+        name: vulnerability-advisor-task
+      params:
+        - name: scanReportFile
+          value: 'app-image-va-report.json'
+        # - name: maxIteration
+        #   value: '5'
+        # - name: sleepTime
+        #   value: '3'
+        # - name: failOnScannedIssues
+        #   value: 'false'
+      workspaces:
+        - name: workspace
+          workspace: pipeline-ws
+      resources:
+        inputs:
+          - name: image
+            resource: app-image
