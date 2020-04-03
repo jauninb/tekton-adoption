@@ -58,10 +58,10 @@ spec:
             value: $(params.branch)
           - name: pipeline-pvc
             value: containerize-$(uid)-pvc
-        workspaces:
-        - name: pipeline-ws
-          persistentVolumeClaim:
-            claimName: containerize-$(uid)-pvc
+        # workspaces:
+        # - name: pipeline-ws
+        #   persistentVolumeClaim:
+        #     claimName: containerize-$(uid)-pvc
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: TriggerBinding

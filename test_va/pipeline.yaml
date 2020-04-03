@@ -27,9 +27,9 @@ spec:
           value: '3'
         # - name: failOnScannedIssues
         #   value: 'false'
-      workspaces:
-        - name: workspace
-          workspace: pipeline-ws
+      # workspaces:
+      #   - name: workspace
+      #     workspace: pipeline-ws
       resources:
         inputs:
           - name: image
