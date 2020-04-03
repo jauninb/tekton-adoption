@@ -10,8 +10,8 @@ spec:
   resources:
   - name: app-image
     type: image
-  workspaces:
-    - name: pipeline-ws
+  # workspaces:
+  #   - name: pipeline-ws
   tasks:
     - name: pipeline-va-task
       taskRef:
