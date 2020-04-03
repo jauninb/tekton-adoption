@@ -6,6 +6,7 @@ spec:
   params:
     - name: branch
       description: the branch for the git repo
+    - name: pipeline-pvc
   resources:
   - name: app-image
     type: image
@@ -16,6 +17,8 @@ spec:
       taskRef:
         name: vulnerability-advisor-task
       params:
+        - name: task-pvc
+          value: $(params.pipeline-pvc)
         - name: scanReportFile
           value: 'app-image-va-report.json'
         - name: maxIteration
