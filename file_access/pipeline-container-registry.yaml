@@ -54,6 +54,7 @@ spec:
             1>&2 whoami
             1>&2 env | sort
             echo "test=TEST A MOI" >> /artifacts/build.properties
+            1>&2 cat /artifacts/build.properties
       workspaces:
         - name: workspace
           workspace: pipeline-ws
