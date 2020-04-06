@@ -52,6 +52,7 @@ spec:
             1>&2 echo "######################"""
             1>&2 ls -l /artifacts
             1>&2 whoami
+            1>&2 groups
             1>&2 echo "######################"""
             # 1>&2 env | sort
             echo "test=TEST A MOI" >> /artifacts/build.properties
