@@ -49,8 +49,8 @@ spec:
             echo "1.0.0-${GIT_BRANCH}-${GIT_COMMIT}"
             # Add a specific tag with cd build number
             echo "1.0.0-${BUILD_NUMBER}"
-            ls -l /artifacts
-            exit 1
+            1>&2 ls -l /artifacts
+            echo "test=TEST A MOI" >> /artifacts/build.properties
       workspaces:
         - name: workspace
           workspace: pipeline-ws
