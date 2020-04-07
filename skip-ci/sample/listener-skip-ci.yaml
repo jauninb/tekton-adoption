@@ -62,12 +62,8 @@ spec:
       value: "$(event.head_commit.id)"
     - name: branch
       value: "$(event.ref)"
-    - name: commit-message_
-      value: "$(event.head_commit.message)"        
     - name: commit-message
-      value: |-
-        ligne1
-        ligne2
+      value: "$(event.head_commit.message)"        
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: EventListener
@@ -77,5 +73,32 @@ spec:
   triggers:
     - binding:
         name: github-commit
+      template:
+        name: skip-ci
+---
+apiVersion: tekton.dev/v1alpha1
+kind: TriggerBinding
+metadata:
+  name: manual
+spec:
+  params:
+    - name: repository
+      value: "https://github.com/jauninb/sample"
+    - name: revision
+      value: ""
+    - name: branch
+      value: "master"
+    - name: commit-message
+      value: |-
+        ligne1
+---
+apiVersion: tekton.dev/v1alpha1
+kind: EventListener
+metadata:
+  name: manual
+spec:
+  triggers:
+    - binding:
+        name: manual
       template:
         name: skip-ci
