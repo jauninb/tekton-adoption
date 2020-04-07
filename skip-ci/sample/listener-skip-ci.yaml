@@ -88,17 +88,48 @@ spec:
       value: ""
     - name: branch
       value: "master"
+---
+apiVersion: tekton.dev/v1alpha1
+kind: TriggerBinding
+metadata:
+  name: manual-one-line
+spec:
+  params:
     - name: commit-message
       value: |-
-        ligne1
+        line1
+---
+apiVersion: tekton.dev/v1alpha1
+kind: TriggerBinding
+metadata:
+  name: manual-two-line
+spec:
+  params:
+    - name: commit-message
+      value: |-
+        line1
+        line2
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: EventListener
 metadata:
-  name: manual
+  name: manual-one-line
 spec:
   triggers:
-    - binding:
-        name: manual
+    - bindings:
+        - name: manual
+        - name: manual-one-line
+      template:
+        name: skip-ci
+---
+apiVersion: tekton.dev/v1alpha1
+kind: EventListener
+metadata:
+  name: manual-two-line
+spec:
+  triggers:
+    - bindings:
+        - name: manual
+        - name: manual-two-line
       template:
         name: skip-ci
