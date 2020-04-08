@@ -1,0 +1,251 @@
+---
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: set-commit-status
+  description: This task will set CI status on the commit
+spec:
+  workspaces:
+    - name: workspace
+      description: The build-properties will be found and written here
+      mountPath: /artifacts
+  inputs:
+    params:
+      - name: ibmcloud-api
+        description: the ibmcloud api
+        default: https://cloud.ibm.com
+      - name: continuous-delivery-context-secret
+        description: name of the configmap containing the continuous delivery pipeline context secrets
+        default: cd-secret
+      - name: ibmcloud-apikey-secret-key
+        description: field in the secret that contains the api key used to login to ibmcloud
+        default: 'API_KEY'
+      - name: git-access-token
+        description: |
+          (optional) token to access the git repository. If this token is provided, there will not be an attempt
+          to use the git token obtained from the authorization flow when adding the git integration in the toolchain
+        default: ''
+      - name: resource-group
+        description: target resource group (name or id) for the ibmcloud login operation
+        default: ''
+      - name: repository
+        description: |
+          The git repository url
+      - name: revision
+        description: |
+          (optional) Commit SHA to set the status for.
+          If left empty, will attempt to read GIT_COMMIT from build-properties
+        default: ''
+      - name: description
+        description: |
+          A short description of the status.
+      - name: context
+        description: |
+          A string label to differentiate this status from
+          the status of other systems. ie: "continuous-integration/tekton"
+        default: "continuous-integration/tekton"
+      - name: state
+        description: |
+          The state of the status. Can be one of the following `error`,
+          `failure`, `pending`, or `success`.
+        default: ''
+      - name: state-var
+        description: |
+          Customized variable stored in build-properties to use as state if state params is empty.
+        type: string
+        default: ''
+      - name: build-properties
+        description: file containing properties out of clone task (can be a filepath name relative to the workspace)
+        default: build.properties
+  steps:
+    - name: fetch-git-information
+      image: ibmcom/pipeline-base-image
+      env:
+        - name: REPOSITORY
+          value: $(inputs.params.repository)
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: $(inputs.params.continuous-delivery-context-secret)
+              key: $(inputs.params.ibmcloud-apikey-secret-key)
+              optional: true
+      command: ["/bin/bash", "-c"]
+      args:
+        - |
+          set -e -o pipefail
+          TOOLCHAIN_ID=$(jq -r '.toolchain_guid' /cd-config/toolchain.json)
+          TOOLCHAIN_REGION=$(jq -r '.region_id' /cd-config/toolchain.json | awk -F: '{print $3}')
+          ##########################################################################
+          # Setting HOME explicitly to have ibmcloud plugins available
+          # doing the export rather than env definition is a workaround
+          # until https://github.com/tektoncd/pipeline/issues/1836 is fixed
+          export HOME="/root"
+          ##########################################################################
+          if [[ "$REPOSITORY" != *.git ]]; then
+            echo "Adding .git suffix to Repository URL"
+            REPOSITORY="${REPOSITORY}.git"
+          fi
+          GIT_SERVICE_INSTANCE_ID=$(jq -r --arg git_repo "$REPOSITORY" '.services[] | select (.parameters.repo_url==$git_repo) | .instance_id' /cd-config/toolchain.json)
+          if [ -z "$GIT_SERVICE_INSTANCE_ID" ]; then
+            echo "No Git integration (repository url: $REPOSITORY) found in the toolchain"
+            exit 1
+          fi
+          GIT_SERVICE_TYPE=$(jq -r --arg git_repo "$REPOSITORY" '.services[] | select (.parameters.repo_url==$git_repo) | .service_id' /cd-config/toolchain.json)
+          if [ "$GIT_SERVICE_TYPE" == "github" ]; then
+            GIT_AUTH_USER="x-oauth-basic"
+            GIT_API_PATH_PREFIX="/api/v3"
+          elif [ "$GIT_SERVICE_TYPE" == "githubpublic" ]; then
+            GIT_AUTH_USER="x-oauth-basic"
+            GIT_API_PATH_PREFIX="/api/v3"
+          elif [ "$GIT_SERVICE_TYPE" == "hostedgit" ]; then
+            GIT_AUTH_USER="oauth2"
+            GIT_API_PATH_PREFIX="/api/v4"
+          elif [ "$GIT_SERVICE_TYPE" == "gitlab" ]; then
+            GIT_AUTH_USER="oauth2"
+            GIT_API_PATH_PREFIX="/api/v4"
+          elif [ "$GIT_SERVICE_TYPE" == "bitbucketgit" ]; then
+            GIT_AUTH_USER="x-token-auth"
+            GIT_API_PATH_PREFIX=""
+          else
+            GIT_AUTH_USER="x-token-auth"
+            GIT_API_PATH_PREFIX=""
+          fi;
+          GIT_TOKEN="$(inputs.params.git-access-token)"
+          if [ -z "$GIT_TOKEN" ]; then
+            echo "Fetching token for $REPOSITORY"
+            ibmcloud config --check-version false
+            ibmcloud login -a $(inputs.params.ibmcloud-api) -r $TOOLCHAIN_REGION --apikey $API_KEY
+            if [ "$(inputs.params.resource-group)" ]; then
+              ibmcloud target -g $(inputs.params.resource-group)
+            fi
+            TOKEN=$(ibmcloud iam oauth-tokens --output JSON | jq -r '.iam_token')
+            GIT_TOKEN_URL=$(jq -r --arg git_repo "$REPOSITORY" '.services[] | select (.parameters.repo_url==$git_repo) | .parameters.token_url' /cd-config/toolchain.json)
+            echo "Doing cURL to ${GIT_TOKEN_URL}?toolchain_id=${TOOLCHAIN_ID}&service_instance_id=${GIT_SERVICE_INSTANCE_ID}&repo_url=${REPOSITORY}"
+            curl -s -o /steps/github_token_result.json -X GET -H "Accept: application/json" -H "Authorization: $TOKEN" "${GIT_TOKEN_URL}?toolchain_id=${TOOLCHAIN_ID}&service_instance_id=${GIT_SERVICE_INSTANCE_ID}&repo_url=${REPOSITORY}"
+            if jq -e '.access_token' /steps/github_token_result.json > /dev/null 2>&1; then
+              GIT_TOKEN=$(jq -r '.access_token' /steps/github_token_result.json)
+              echo "Access token found for the Git integration (repository url: $REPOSITORY)"
+            else
+              echo "No access token found for the Git integration (repository url: $REPOSITORY)"
+              cat /steps/github_token_result.json
+              exit 1
+            fi
+          else
+            echo "Using git Access Token provided"
+          fi
+
+          GIT_API_ROOT_URL=$(jq -r --arg git_repo "$REPOSITORY" '.services[] | select (.parameters.repo_url==$git_repo) | .parameters.api_root_url' /cd-config/toolchain.json)
+          GIT_OWNER_ID=$(jq -r --arg git_repo "$REPOSITORY" '.services[] | select (.parameters.repo_url==$git_repo) | .parameters.owner_id' /cd-config/toolchain.json)
+          GIT_REPO_NAME=$(jq -r --arg git_repo "$REPOSITORY" '.services[] | select (.parameters.repo_url==$git_repo) | .parameters.repo_name' /cd-config/toolchain.json)
+
+          TOOLCHAIN_REGION=$(jq -r '.region_id' /cd-config/toolchain.json | awk -F: '{print $3}')
+
+          echo "GIT_REPOSITORY=$REPOSITORY" > /steps/next-step-env.properties
+          echo "GIT_AUTH_USER=$GIT_AUTH_USER" >> /steps/next-step-env.properties
+          echo "GIT_TOKEN=$GIT_TOKEN" >> /steps/next-step-env.properties
+          echo "GIT_SERVICE_TYPE=$GIT_SERVICE_TYPE" >> /steps/next-step-env.properties
+          echo "GIT_API_ROOT_URL=$GIT_API_ROOT_URL" >> /steps/next-step-env.properties
+          echo "GIT_API_PATH_PREFIX=$GIT_API_PATH_PREFIX" >> /steps/next-step-env.properties
+          echo "GIT_OWNER_ID=$GIT_OWNER_ID" >> /steps/next-step-env.properties
+          echo "GIT_REPO_NAME=$GIT_REPO_NAME" >> /steps/next-step-env.properties
+          echo "TOOLCHAIN_REGION=$TOOLCHAIN_REGION" >> /steps/next-step-env.properties
+
+          cat /steps/next-step-env.properties
+      volumeMounts:
+        - mountPath: /cd-config
+          name: cd-config-volume
+        - mountPath: /steps
+          name: steps-volume
+    - name: set-status
+      image: registry.redhat.io/ubi8/ubi:8.1
+      env:
+        - name: PIPELINE_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['devops.cloud.ibm.com/pipeline-id']
+        - name: PIPELINE_RUN_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['devops.cloud.ibm.com/tekton-pipeline']
+      script: |
+        #!/usr/libexec/platform-python
+        import json
+        import os
+        import http.client
+        from urllib.parse import urlparse
+
+        # extract the previouly properties found in previous step
+        previous_step={}
+        f = open("/steps/next-step-env.properties", "r")
+        for x in f:
+          prop = x.split("=", 1)
+          previous_step[prop[0]] = prop[1].strip()
+        f.close()
+
+        # extract the build properties in their own structure 
+        build={}
+        if os.path.exists("$(workspaces.workspace.path)/$(inputs.params.build-properties)"):
+          f = open("$(workspaces.workspace.path)/$(inputs.params.build-properties)", "r")
+          for x in f:
+              print(x)
+              prop = x.split("=", 1)
+              build[prop[0]] = prop[1].strip()
+          f.close()
+
+        # find the state 
+        state = "$(inputs.params.state)"
+        if "$(inputs.params.state-var)" != "":
+          state = build["$(inputs.params.state-var)"]
+        # TODO - make the state value consistent to the git flavor
+
+        # find the commit to set status on
+        revision = "$(inputs.params.revision)"
+        if revision == "":
+          revision = build["GIT_COMMIT"]
+          print(revision)
+
+        target_url = ("https://cloud.ibm.com/devops/pipelines/tekton/" + os.environ["PIPELINE_ID"] +
+          "/runs/" + os.environ["PIPELINE_RUN_ID"] + "?env_id=ibm:yp:" + previous_step["TOOLCHAIN_REGION"])
+
+        status_url = (previous_step["GIT_API_PATH_PREFIX"] + "/repos/" + previous_step["GIT_OWNER_ID"] +
+          "/" + previous_step["GIT_REPO_NAME"] + "/statuses/" + revision)
+
+        o = urlparse(previous_step["GIT_API_ROOT_URL"])
+        git_host = o.netloc
+
+        data = {
+          "state": state,
+          "target_url": target_url,
+          "description": "$(inputs.params.description)",
+          "context": "$(inputs.params.context)"
+        }
+        print("Sending this data to " + previous_step["GIT_API_ROOT_URL"])
+        print(data)
+        conn = http.client.HTTPSConnection(git_host)
+        r = conn.request(
+          "POST",
+          status_url,
+          body=json.dumps(data),
+          headers={
+              "User-Agent": "TektonCD, the peaceful cat",
+              "Authorization": "Bearer " + previous_step["GIT_TOKEN"],
+          })
+        resp = conn.getresponse()
+        if not str(resp.status).startswith("2"):
+          print("Error: %d" % (resp.status))
+          print(resp.read())
+        else:
+          print("git commit status '" + state + "' has been set on "
+            + previous_step["GIT_REPOSITORY"] + "#" + revision)
+      volumeMounts:
+        - mountPath: /steps
+          name: steps-volume
+  volumes:
+    - name: steps-volume
+      emptyDir: {}
+    - name: cd-config-volume
+      configMap:
+        name: toolchain
+        items:
+          - key: toolchain.json
+            path: toolchain.json
