@@ -67,7 +67,8 @@ spec:
     - name: branch
       value: "$(event.ref)"
     - name: commit-message
-      value: $(event.head_commit.message)
+      value: |-
+        $(event.head_commit.message)
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: EventListener
