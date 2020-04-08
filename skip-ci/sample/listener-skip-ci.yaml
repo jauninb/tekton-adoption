@@ -4,6 +4,8 @@ metadata:
   name: skip-ci
 spec:
   params:
+    - name: ibmcloud-api
+      default: 'https://cloud.ibm.com' 
     - name: repository
       description: The git repo
     - name: branch
@@ -43,6 +45,8 @@ spec:
         params:
           - name: pipeline-pvc
             value: pipelinerun-$(uid)-pvc
+          - name: ibmcloud-api
+            value: $(params.ibmcloud-api)
           - name: repository
             value: $(params.repository)
           - name: branch
@@ -63,7 +67,7 @@ spec:
     - name: branch
       value: "$(event.ref)"
     - name: commit-message
-      value: "$(event.head_commit.message)"        
+      value: $(event.head_commit.message)
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: EventListener
