@@ -254,7 +254,7 @@ spec:
         else:
           # Default to github
           status_url = (previous_step["GIT_API_ROOT_URL"] 
-            + "repos/" + previous_step["GIT_OWNER_ID"] + "/" + previous_step["GIT_REPO_NAME"]
+            + "/repos/" + previous_step["GIT_OWNER_ID"] + "/" + previous_step["GIT_REPO_NAME"]
             + "/statuses/" + revision)
           data = {
             "state": state,
@@ -266,7 +266,7 @@ spec:
             status_url,
             data=json.dumps(data).encode('utf8'),
             headers={
-                "content-type": 'application/json',
+                "content-type": "application/json",
                 "Authorization": "Bearer " + previous_step["GIT_TOKEN"]
             },
             method="POST"
