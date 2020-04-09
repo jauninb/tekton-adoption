@@ -23,6 +23,8 @@ spec:
           value: $(params.branch)
         - name: revision
           value: $(params.revision)
+        - name: pipeline-debug
+          value: "1"
     - name: set-commit-status
       taskRef:
         name: set-commit-status
