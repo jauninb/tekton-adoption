@@ -203,7 +203,6 @@ spec:
         if os.path.exists("/artifacts/$(inputs.params.build-properties)"):
           f = open("/artifacts/$(inputs.params.build-properties)", "r")
           for x in f:
-              print(x)
               prop = x.split("=", 1)
               build[prop[0]] = prop[1].strip()
           f.close()
@@ -221,7 +220,6 @@ spec:
         revision = "$(inputs.params.revision)"
         if revision == "":
           revision = build["GIT_COMMIT"]
-          print(revision)
 
         description="$(inputs.params.description)"
 
@@ -257,6 +255,7 @@ spec:
             + "/commit/" + revision + "/statuses/build")
           print(status_url)
           data = {
+            "key": os.environ["PIPELINE_ID"],
             "url": target_url,
             "state": state,
             "name": context,
@@ -310,7 +309,6 @@ spec:
             print("Status: %d" % (resp.status))
             print(resp.read())
             sys.exit(0)
-
       volumeMounts:
         - mountPath: /steps
           name: steps-volume
