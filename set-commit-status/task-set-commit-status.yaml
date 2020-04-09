@@ -255,7 +255,12 @@ spec:
           authorization_header = "TODO " + previous_step["GIT_TOKEN"]
         else:
           # Default to github
-          status_url = (previous_step["GIT_API_ROOT_URL"] 
+          if previous_step["GIT_ID"] == "integrated":
+            api_prefix="/v3"
+          else:
+            api_prefix=""
+
+          status_url = (previous_step["GIT_API_ROOT_URL"] + api_prefix
             + "/repos/" + previous_step["GIT_OWNER_ID"] + "/" + previous_step["GIT_REPO_NAME"]
             + "/statuses/" + revision)
           data = {
@@ -284,6 +289,8 @@ spec:
           else:
             print(previous_step["GIT_ID"] + " commit status '" + state + "' has been set on "
               + previous_step["GIT_REPOSITORY"] + "#" + revision)
+            print("Status: %d" % (resp.status))
+            print(resp.read())
             sys.exit(0)
       volumeMounts:
         - mountPath: /steps
