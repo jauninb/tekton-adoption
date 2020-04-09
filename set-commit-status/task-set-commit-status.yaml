@@ -181,9 +181,9 @@ spec:
         #!/usr/libexec/platform-python
         import json
         import os
-        import http.client
         import sys
-        from urllib.parse import urlparse
+        import urllib.request
+        import urllib.parse
 
         # extract the previouly properties found in previous step
         previous_step={}
@@ -226,16 +226,26 @@ spec:
         target_url = ("https://cloud.ibm.com/devops/pipelines/tekton/" + os.environ["PIPELINE_ID"] +
           "/runs/" + os.environ["PIPELINE_RUN_ID"] + "?env_id=ibm:yp:" + previous_step["TOOLCHAIN_REGION"])
 
+        # Create the request object according to the Git Falvor API
         if previous_step["GIT_SERVICE_TYPE"] == "gitlab" or previous_step["GIT_SERVICE_TYPE"] == "hostedgit" :
-          status_url = ("/v4/projects/" + previous_step["GIT_OWNER_ID"] + "%2F" + previous_step["GIT_REPO_NAME"] + "/statuses/" + revision)
+          status_url = (previous_step["GIT_API_ROOT_URL"]
+            + "/v4/projects/" + previous_step["GIT_OWNER_ID"] + "%2F" + previous_step["GIT_REPO_NAME"]
+            + "/statuses/" + revision)
           params = {
-           "state": state,
-           "description": description,
-           "context": context,
-           "target_url": target_url
+            "state": state,
+            "description": description,
+            "context": context,
+            "target_url": target_url
           }
-          data = {}
-          authorization_header = "Bearer " + previous_step["GIT_TOKEN"]
+          url_query_params = urllib.parse.urlencode(params)  
+          req = urllib.request.Request(
+            status_url + "?" + url_query_params,
+            data=None,
+            headers={
+                "Authorization": "Bearer " + previous_step["GIT_TOKEN"]
+            },
+            method="POST"
+          )
         elif previous_step["GIT_SERVICE_TYPE"] == "bitbucketgit":
           status_url = ""
           params = {}
@@ -243,43 +253,36 @@ spec:
           authorization_header = "TODO " + previous_step["GIT_TOKEN"]
         else:
           # Default to github
-          status_url = ("repos/" + previous_step["GIT_OWNER_ID"] +
-            "/" + previous_step["GIT_REPO_NAME"] + "/statuses/" + revision)
-          params = {}
+          status_url = (previous_step["GIT_API_ROOT_URL"] 
+            + "repos/" + previous_step["GIT_OWNER_ID"] + "/" + previous_step["GIT_REPO_NAME"]
+            + "/statuses/" + revision)
           data = {
             "state": state,
             "target_url": target_url,
             "description": description,
             "context": context
           }
-          authorization_header = "Bearer " + previous_step["GIT_TOKEN"]
+          req = urllib.request.Request(
+            status_url,
+            data=json.dumps(data),
+            headers={
+                "User-Agent": "TektonCD, the peaceful cat",
+                "Authorization": "Bearer " + previous_step["GIT_TOKEN"]
+            },
+            method="POST"
+          )
 
-        print("Sending this data to " + previous_step["GIT_API_ROOT_URL"] + status_url)
-        print(data)
+        req.add_header("User-Agent", "TektonCD, the peaceful cat")
 
-        # Find the git host to make the https request
-        o = urlparse(previous_step["GIT_API_ROOT_URL"])
-        git_host = o.netloc
-
-        conn = http.client.HTTPSConnection(git_host)
-        r = conn.request(
-          "POST",
-          status_url,
-          params=params,
-          body=json.dumps(data),
-          headers={
-              "User-Agent": "TektonCD, the peaceful cat",
-              "Authorization": authorization_header,
-          })
-        resp = conn.getresponse()
-        if not str(resp.status).startswith("2"):
-          print("Error: %d" % (resp.status))
-          print(resp.read())
-          sys.exit(1)
-        else:
-          print("git commit status '" + state + "' has been set on "
-            + previous_step["GIT_REPOSITORY"] + "#" + revision)
-          sys.exit(0)
+        with urllib.request.urlopen(req) as resp:
+          if not str(resp.status).startswith("2"):
+            print("Error: %d" % (resp.status))
+            print(resp.read())
+            sys.exit(1)
+          else:
+            print("git commit status '" + state + "' has been set on "
+              + previous_step["GIT_REPOSITORY"] + "#" + revision)
+            sys.exit(0)
       volumeMounts:
         - mountPath: /steps
           name: steps-volume
