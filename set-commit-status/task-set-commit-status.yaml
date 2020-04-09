@@ -265,7 +265,7 @@ spec:
         r = conn.request(
           "POST",
           status_url,
-          params=params
+          params=params,
           body=json.dumps(data),
           headers={
               "User-Agent": "TektonCD, the peaceful cat",
