@@ -57,7 +57,7 @@ spec:
         default: build.properties
   steps:
     - name: fetch-git-information
-      image: ibmcom/pipeline-base-image
+      image: ibmcom/pipeline-base-image:2.6
       env:
         - name: REPOSITORY
           value: $(inputs.params.repository)
@@ -155,7 +155,7 @@ spec:
         - mountPath: /steps
           name: steps-volume
     - name: set-status
-      image: registry.redhat.io/ubi8/ubi:8.1
+      image: registry.access.redhat.com/ubi8/ubi:8.1
       env:
         - name: PIPELINE_ID
           valueFrom:
