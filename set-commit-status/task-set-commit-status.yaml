@@ -264,9 +264,9 @@ spec:
           }
           req = urllib.request.Request(
             status_url,
-            data=json.dumps(data),
+            data=json.dumps(data).encode('utf8'),
             headers={
-                "User-Agent": "TektonCD, the peaceful cat",
+                "content-type": 'application/json',
                 "Authorization": "Bearer " + previous_step["GIT_TOKEN"]
             },
             method="POST"
@@ -280,7 +280,7 @@ spec:
             print(resp.read())
             sys.exit(1)
           else:
-            print("git commit status '" + state + "' has been set on "
+            print(previous_step["GIT_SERVICE_TYPE"] + " commit status '" + state + "' has been set on "
               + previous_step["GIT_REPOSITORY"] + "#" + revision)
             sys.exit(0)
       volumeMounts:
