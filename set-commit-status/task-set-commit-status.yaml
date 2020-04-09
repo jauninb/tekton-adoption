@@ -254,7 +254,8 @@ spec:
         elif previous_step["GIT_ID"] == "bitbucketgit":
           status_url = (previous_step["GIT_API_ROOT_URL"]
             + "/2.0/repositories/" + previous_step["GIT_OWNER_ID"] + "/" + previous_step["GIT_REPO_NAME"]
-            + "/commit/" + revision + "/status/builds")
+            + "/commit/" + revision + "/statuses/builds")
+          print(status_url)
           data = {
             "url": target_url,
             "state": state,
