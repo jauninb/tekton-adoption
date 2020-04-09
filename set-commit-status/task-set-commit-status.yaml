@@ -44,8 +44,11 @@ spec:
         default: "continuous-integration/tekton"
       - name: state
         description: |
-          The state of the status. Can be one of the following `error`,
-          `failure`, `pending`, or `success`.
+          The state of the status. Can be one of the following: `pending`, `running`, `success`, `failed`, `canceled`
+          or a value meaningful for the target git repository
+          - gitlab/hostedgit: `pending`, `running`, `success`, `failed`, `canceled`
+          - github/integrated github: `pending`, `success`, `failure`, `error`
+          - bitbucket: `SUCCESSFUL`, `FAILED`, `INPROGRESS`, `STOPPED`
         default: ''
       - name: state-var
         description: |
@@ -212,7 +215,7 @@ spec:
         # TODO - make the state value consistent to the git flavor
         # Github: pending, success, failure, error
         # Gitlab: pending, running, success, failed, canceled
-        # Bitbucket: INPROGRESS, SUCCESSFUL, FAILED
+        # Bitbucket: SUCCESSFUL, FAILED, INPROGRESS, STOPPED
 
         # find the commit to set status on
         revision = "$(inputs.params.revision)"
@@ -249,10 +252,24 @@ spec:
             method="POST"
           )
         elif previous_step["GIT_ID"] == "bitbucketgit":
-          status_url = ""
-          params = {}
-          data = {}
-          authorization_header = "TODO " + previous_step["GIT_TOKEN"]
+          status_url = (previous_step["GIT_API_ROOT_URL"]
+            + "/2.0/repositories/" + previous_step["GIT_OWNER_ID"] + "/" + previous_step["GIT_REPO_NAME"]
+            + "/commit/" + revision + "/status/builds")
+          data = {
+            "url": target_url,
+            "state": state,
+            "name": context,
+            "description": description
+          }
+          req = urllib.request.Request(
+            status_url,
+            data=json.dumps(data).encode('utf8'),
+            headers={
+                "content-type": "application/json",
+                "Authorization": "Bearer " + previous_step["GIT_TOKEN"]
+            },
+            method="POST"
+          )
         else:
           # Default to github
           if previous_step["GIT_ID"] == "integrated":
@@ -292,6 +309,7 @@ spec:
             print("Status: %d" % (resp.status))
             print(resp.read())
             sys.exit(0)
+
       volumeMounts:
         - mountPath: /steps
           name: steps-volume
