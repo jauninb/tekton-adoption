@@ -171,6 +171,7 @@ spec:
         import os
         import http.client
         from urllib.parse import urlparse
+        from urllib.parse import quote
 
         # extract the previouly properties found in previous step
         previous_step={}
@@ -195,6 +196,9 @@ spec:
         if "$(inputs.params.state-var)" != "":
           state = build["$(inputs.params.state-var)"]
         # TODO - make the state value consistent to the git flavor
+        # Github: pending, success, failure, error
+        # Gitlab: pending, running, success, failed, canceled
+        # Bitbucket: INPROGRESS, SUCCESSFUL, FAILED
 
         # find the commit to set status on
         revision = "$(inputs.params.revision)"
@@ -202,23 +206,39 @@ spec:
           revision = build["GIT_COMMIT"]
           print(revision)
 
+        # compute the target url of this pipeline run
         target_url = ("https://cloud.ibm.com/devops/pipelines/tekton/" + os.environ["PIPELINE_ID"] +
           "/runs/" + os.environ["PIPELINE_RUN_ID"] + "?env_id=ibm:yp:" + previous_step["TOOLCHAIN_REGION"])
 
-        status_url = (previous_step["GIT_API_PATH_PREFIX"] + "/repos/" + previous_step["GIT_OWNER_ID"] +
-          "/" + previous_step["GIT_REPO_NAME"] + "/statuses/" + revision)
+        if build["GIT_SERVICE_TYPE"] == "gitlab" or build["GIT_SERVICE_TYPE"] == "hostedgit" :
+          status_url = (previous_step["GIT_API_PATH_PREFIX"] + "/projects/" + previous_step["GIT_OWNER_ID"] + "%2F" + previous_step["GIT_REPO_NAME"] + "/statuses/" + revision +
+           "?state=" + state + "&description=" + quote(description) + "&context=" + quote(context) +
+           "&target_url=" + quote(target_url))
+          data = {}
+          authorization_header = "PRIVATE-TOKEN: " + previous_step["GIT_TOKEN"]
+        elif build["GIT_SERVICE_TYPE"] == "bitbucketgit":
+          status_url = ""
+          data = {}
+          authorization_header = "TODO " + previous_step["GIT_TOKEN"]
+        else:
+          # Default to github
+          status_url = (previous_step["GIT_API_PATH_PREFIX"] + "/repos/" + previous_step["GIT_OWNER_ID"] +
+            "/" + previous_step["GIT_REPO_NAME"] + "/statuses/" + revision)
+          data = {
+            "state": state,
+            "target_url": target_url,
+            "description": "$(inputs.params.description)",
+            "context": "$(inputs.params.context)"
+          }
+          authorization_header = "Bearer " + previous_step["GIT_TOKEN"]
 
+        print("Sending this data to " + previous_step["GIT_API_ROOT_URL"] + "/" + status_url)
+        print(data)
+
+        # Find the git host to make the https request
         o = urlparse(previous_step["GIT_API_ROOT_URL"])
         git_host = o.netloc
 
-        data = {
-          "state": state,
-          "target_url": target_url,
-          "description": "$(inputs.params.description)",
-          "context": "$(inputs.params.context)"
-        }
-        print("Sending this data to " + previous_step["GIT_API_ROOT_URL"])
-        print(data)
         conn = http.client.HTTPSConnection(git_host)
         r = conn.request(
           "POST",
@@ -226,7 +246,7 @@ spec:
           body=json.dumps(data),
           headers={
               "User-Agent": "TektonCD, the peaceful cat",
-              "Authorization": "Bearer " + previous_step["GIT_TOKEN"],
+              "Authorization": authorization_header,
           })
         resp = conn.getresponse()
         if not str(resp.status).startswith("2"):
