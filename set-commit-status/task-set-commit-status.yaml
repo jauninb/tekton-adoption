@@ -165,7 +165,9 @@ spec:
           echo "GIT_REPO_NAME=$GIT_REPO_NAME" >> /steps/next-step-env.properties
           echo "TOOLCHAIN_REGION=$TOOLCHAIN_REGION" >> /steps/next-step-env.properties
 
-          cat /steps/next-step-env.properties
+          if [ $PIPELINE_DEBUG == 1 ]; then
+            cat /steps/next-step-env.properties
+          fi
       volumeMounts:
         - mountPath: /cd-config
           name: cd-config-volume
@@ -278,7 +280,7 @@ spec:
           status_url = (previous_step["GIT_API_ROOT_URL"]
             + "/2.0/repositories/" + previous_step["GIT_OWNER_ID"] + "/" + previous_step["GIT_REPO_NAME"]
             + "/commit/" + revision + "/statuses/build")
-          print(status_url)
+
           if state in state_mapping_generic_to_bitbucket:
             bitbucket_state = state_mapping_generic_to_bitbucket[state]
           else:
