@@ -192,8 +192,12 @@ spec:
 
         # extract the previouly properties found in previous step
         previous_step={}
-        f = open("/steps/next-step-env.properties", "r")
+        if os.environ["PIPELINE_DEBUG"] == "1":
+          print("previous step properties:")        
+        f = open("/steps/next-step-env.properties", "r")        
         for x in f:
+          if os.environ["PIPELINE_DEBUG"] == "1":
+            print(x)
           prop = x.split("=", 1)
           previous_step[prop[0]] = prop[1].strip()
         f.close()
@@ -201,8 +205,12 @@ spec:
         # extract the build properties in their own structure 
         build={}
         if os.path.exists("/artifacts/$(inputs.params.build-properties)"):
+          if os.environ["PIPELINE_DEBUG"] == "1":
+            print("$(inputs.params.build-properties):")
           f = open("/artifacts/$(inputs.params.build-properties)", "r")
           for x in f:
+              if os.environ["PIPELINE_DEBUG"] == "1":
+                print(x)
               prop = x.split("=", 1)
               build[prop[0]] = prop[1].strip()
           f.close()
@@ -210,11 +218,28 @@ spec:
         # find the state 
         state = "$(inputs.params.state)"
         if "$(inputs.params.state-var)" != "":
+          print("Looking for state in $(inputs.params.build-properties)")
           state = build["$(inputs.params.state-var)"]
-        # TODO - make the state value consistent to the git flavor
-        # Github: pending, success, failure, error
+
+        # Make the state value consistent to the git flavor
+        # Generic state values are: pending, running, success, failed, canceled
+        # Define mapping from generic to git flavor to put the appropriate value for git target
+        # Allowed Github state values: pending, success, failure, error
+        state_mapping_generic_to_github = {
+          "failed": "failure",
+          "canceled": "error",
+          "running": "pending"
+        } 
         # Gitlab: pending, running, success, failed, canceled
-        # Bitbucket: SUCCESSFUL, FAILED, INPROGRESS, STOPPED
+        # no mapping for gitlab as generic state value are identical
+        # Allowed Bitbucket state values: SUCCESSFUL, FAILED, INPROGRESS, STOPPED
+        state_mapping_generic_to_bitbucket = {
+          "pending": "INPROGRESS",
+          "running": "INPROGRESS",
+          "success": "SUCCESSFUL",
+          "failed": "FAILED",
+          "canceled": "STOPPED"
+        }
 
         # find the commit to set status on
         revision = "$(inputs.params.revision)"
@@ -254,10 +279,17 @@ spec:
             + "/2.0/repositories/" + previous_step["GIT_OWNER_ID"] + "/" + previous_step["GIT_REPO_NAME"]
             + "/commit/" + revision + "/statuses/build")
           print(status_url)
+          bitbucket_state = state_mapping_generic_to_bitbucket[state]
+          if bitbucket_state == None:
+            # No mapping found - use the state value provided
+            bitbucket_state = state
+          
+          print("State value '" + state + "' mapped to bitbucket state '" + bitbucket_state + "'")
+
           data = {
             "key": os.environ["PIPELINE_ID"],
             "url": target_url,
-            "state": state,
+            "state": bitbucket_state,
             "name": context,
             "description": description
           }
@@ -277,11 +309,18 @@ spec:
           else:
             api_prefix=""
 
+          github_state = state_mapping_generic_to_github[state]
+          if github_state == None:
+            # No mapping found - use the state value provided
+            github_state = state
+
+          print("State value '" + state + "' mapped to github state '" + github_state + "'")
+
           status_url = (previous_step["GIT_API_ROOT_URL"] + api_prefix
             + "/repos/" + previous_step["GIT_OWNER_ID"] + "/" + previous_step["GIT_REPO_NAME"]
             + "/statuses/" + revision)
           data = {
-            "state": state,
+            "state": github_state,
             "target_url": target_url,
             "description": description,
             "context": context
@@ -306,8 +345,9 @@ spec:
           else:
             print(previous_step["GIT_ID"] + " commit status '" + state + "' has been set on "
               + previous_step["GIT_REPOSITORY"] + "#" + revision)
-            print("Status: %d" % (resp.status))
-            print(resp.read())
+            if os.environ["PIPELINE_DEBUG"] == "1":
+              print("Status: %d" % (resp.status))
+              print(resp.read())
             sys.exit(0)
       volumeMounts:
         - mountPath: /steps
