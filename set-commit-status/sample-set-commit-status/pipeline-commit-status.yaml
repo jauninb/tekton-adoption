@@ -40,3 +40,5 @@ spec:
           value: $(params.description)
         - name: state
           value: $(params.state)
+        - name: pipeline-debug
+          value: "1"

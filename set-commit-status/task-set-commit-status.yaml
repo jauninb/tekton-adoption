@@ -279,8 +279,9 @@ spec:
             + "/2.0/repositories/" + previous_step["GIT_OWNER_ID"] + "/" + previous_step["GIT_REPO_NAME"]
             + "/commit/" + revision + "/statuses/build")
           print(status_url)
-          bitbucket_state = state_mapping_generic_to_bitbucket[state]
-          if bitbucket_state == None:
+          if state in state_mapping_generic_to_bitbucket:
+            bitbucket_state = state_mapping_generic_to_bitbucket[state]
+          else:
             # No mapping found - use the state value provided
             bitbucket_state = state
           
@@ -309,8 +310,9 @@ spec:
           else:
             api_prefix=""
 
-          github_state = state_mapping_generic_to_github[state]
-          if github_state == None:
+          if state in state_mapping_generic_to_github:
+            github_state = state_mapping_generic_to_github[state]
+          else:
             # No mapping found - use the state value provided
             github_state = state
 
