@@ -10,6 +10,8 @@ spec:
     - name: revision
     - name: state
     - name: description
+    - name: pipeline-debug
+      default: "0"
   tasks:
     - name: clone-repository
       taskRef:
@@ -24,7 +26,7 @@ spec:
         - name: revision
           value: $(params.revision)
         - name: pipeline-debug
-          value: "1"
+          value: $(params.pipeline-debug)
     - name: set-commit-status
       taskRef:
         name: set-commit-status
@@ -41,4 +43,4 @@ spec:
         - name: state
           value: $(params.state)
         - name: pipeline-debug
-          value: "1"
+          value: $(params.pipeline-debug)
