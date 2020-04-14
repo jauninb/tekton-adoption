@@ -57,6 +57,8 @@ spec:
           value: $(inputs.params.ibmcloudApi)
         - name: IBMCLOUD_RESOURCE_GROUP
           value: $(inputs.params.resourceGroup)
+        - name: PROPERTIES_FILE
+          value: $(inputs.params.propertiesFile)
         # CD execution context injection
         - name: PIPELINE_RUN_NAME
           valueFrom:
