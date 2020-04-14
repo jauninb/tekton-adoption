@@ -102,7 +102,7 @@ spec:
 
           # Manage multiple tags for an image
           # Add dynamically computed tags
-          printf "#!/bin/sh\n" > /steps/additionnalTags.sh
+          printf "#!/bin/bash\n" > /steps/additionnalTags.sh
           printf "%s " '$(inputs.params.additionalTagsScript)' >> /steps/additionnalTags.sh
           chmod +x /steps/additionnalTags.sh
           /steps/additionnalTags.sh 2 >& 1 > /steps/tags.lst
