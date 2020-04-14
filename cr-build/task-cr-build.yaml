@@ -139,10 +139,48 @@ spec:
             $(inputs.params.pathToContext)
 
           # Create remaining tags for the image
-          for tag in $(tail --lines=+2 tags.lst)
+          for tag in $(tail --lines=+2 /steps/tags.lst)
           do
             ibmcloud cr image-tag $(head --lines=1 /steps/tags.lst) $tag
           done
+
+          # Workaround to reference the latest ibmcloud cr plugin
+          if ibmcloud cr image-digests; then
+            echo "ibmcloud cr plugin has an appropriate version containing image-digests command"
+          else
+            ibmcloud plugin update container-registry --force
+          fi            
+
+          IMAGE_TAG=$(head --lines=1 /steps/tags.lst |  awk -F: '{print $2}')
+          echo "**"
+          echo "** ibmcloud cr image-digests --restrict ${REGISTRY_NAMESPACE}/${IMAGE_NAME}"
+          ibmcloud cr image-digests --restrict ${REGISTRY_NAMESPACE}/${IMAGE_NAME}
+          echo "** ibmcloud cr image-digests --restrict ${REGISTRY_NAMESPACE}/${IMAGE_NAME} --format '{{ .Repository}}:{{ .Tags }} {{ .Digest }}'"
+          ibmcloud cr image-digests --restrict ${REGISTRY_NAMESPACE}/${IMAGE_NAME} --format '{{ .Repository}}:{{ .Tags }} {{ .Digest }}'
+          echo "**"
+          MANIFEST_SHA=$(ibmcloud cr image-digests --restrict ${REGISTRY_NAMESPACE}/${IMAGE_NAME} --format '{{ .Repository}}:{{ .Tags }} {{ .Digest }}' | grep "${IMAGE_TAG}" | awk '{print $NF}')
+
+          # Because of https://github.com/tektoncd/pipeline/issues/216
+          # the image digest for input is/will always empty
+          # there was an alternative/workaround but it is updating using a specific account
+          # and using a kubectl command to update the resources
+          # see https://github.com/nlewo/poc-tekton#deploy-tasks
+          # https://raw.githubusercontent.com/tektoncd/catalog/0b48da8e336a4214aff46af242658dc056199b1c/update-image-digests/image-digest-updater.yaml
+          # https://raw.githubusercontent.com/tektoncd/catalog/0b48da8e336a4214aff46af242658dc056199b1c/update-image-digests/update-image-digests.yaml
+          # Here the workaround will be to add registry and image information in an output properties file
+          if [ "$PROPERTIES_FILE" ]; then
+            cd /artifacts
+            touch $PROPERTIES_FILE
+            echo "REGISTRY_URL=${REGISTRY_URL}" >> $PROPERTIES_FILE
+            echo "REGISTRY_NAMESPACE=${REGISTRY_NAMESPACE}" >> $PROPERTIES_FILE
+            echo "REGISTRY_REGION=${REGISTRY_REGION}" >> $PROPERTIES_FILE
+            echo "IMAGE_NAME=${IMAGE_NAME}" >> $PROPERTIES_FILE
+            echo "IMAGE_TAGS=$(tr -s '\r\n' ',' < /steps/tags.lst | sed -e 's/,$/\n/')" >> $PROPERTIES_FILE
+            echo "IMAGE_MANIFEST_SHA=${MANIFEST_SHA}" >> $PROPERTIES_FILE
+            echo "$PROPERTIES_FILE content:"
+            cat $PROPERTIES_FILE
+          fi
+
       volumeMounts:
         - mountPath: /cd-config
           name: cd-config-volume
