@@ -177,7 +177,8 @@ spec:
             echo "REGISTRY_NAMESPACE=${REGISTRY_NAMESPACE}" >> $PROPERTIES_FILE
             echo "REGISTRY_REGION=${REGISTRY_REGION}" >> $PROPERTIES_FILE
             echo "IMAGE_NAME=${IMAGE_NAME}" >> $PROPERTIES_FILE
-            echo "IMAGE_TAGS=$(tr -s '\r\n' ',' < $(sed -i "s#^$REGISTRY_URL/$REGISTRY_NAMESPACE/$IMAGE_NAME:##" /steps/tags.lst) | sed -e 's/,$/\n/')" >> $PROPERTIES_FILE
+            IMAGE_TAGS=$(sed "s#^$REGISTRY_URL/$REGISTRY_NAMESPACE/$IMAGE_NAME:##" /steps/tags.lst | tr -s '\r\n' ',' | sed -e 's/,$/\n/')
+            echo "IMAGE_TAGS=$IMAGE_TAGS" >> $PROPERTIES_FILE
             echo "IMAGE_MANIFEST_SHA=${MANIFEST_SHA}" >> $PROPERTIES_FILE
             echo "$PROPERTIES_FILE content:"
             cat $PROPERTIES_FILE
