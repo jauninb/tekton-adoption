@@ -44,7 +44,7 @@ spec:
   steps:
     - name: check-registry-and-build-image
       image: ibmcom/pipeline-base-image:2.6
-      workingDir: /steps
+      workingDir: /artifacts
       env:
         - name: API_KEY
           valueFrom:
@@ -139,7 +139,10 @@ spec:
             $(inputs.params.pathToContext)
 
           # Create remaining tags for the image
-
+          for tag in $(tail --lines=+2 tags.lst)
+          do
+            ibmcloud cr image-tag $(head --lines=1 /steps/tags.lst) $tag
+          done
       volumeMounts:
         - mountPath: /cd-config
           name: cd-config-volume
