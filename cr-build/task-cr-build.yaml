@@ -26,9 +26,6 @@ spec:
       - name: dockerfile
         description: The name of the Dockerfile
         default: "Dockerfile"
-      - name: buildkit_image
-        description: The name of the BuildKit image
-        default: "moby/buildkit:v0.6.3-rootless"
       - name: additionalTags
         description: comma-separated list of additionalTags
         # can not be defined as an array because of variable substition error for array
@@ -40,18 +37,12 @@ spec:
       - name: propertiesFile
         description: file containing properties out of containerize task
         default: build.properties
-    # resources:
-    #   # TODO consider an optional git repository as the source of the image to build
-    #   # when cd tekton support will be to tekton pipeline v 0.10
-    #   - name: workspace
-    #     type: git
-    #     optional: true
   outputs:
     resources:
       - name: builtImage
         type: image
   steps:
-    - name: check-registry
+    - name: check-registry-and-build-image
       image: ibmcom/pipeline-base-image:2.6
       workingDir: /steps
       env:
@@ -60,6 +51,41 @@ spec:
             secretKeyRef:
               name: $(inputs.params.continuous-delivery-context-secret)
               key: $(inputs.params.container-registry-apikey-secret-key)
+        - name: IMAGE_RESOURCE_URL
+          value: $(outputs.resources.builtImage.url)
+        - name: IBMCLOUD_API
+          value: $(inputs.params.ibmcloudApi)
+        - name: IBMCLOUD_RESOURCE_GROUP
+          value: $(inputs.params.resourceGroup)
+        # CD execution context injection
+        - name: PIPELINE_RUN_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.labels['tekton.dev/pipelineRun']
+        - name: PIPELINE_RUN_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['devops.cloud.ibm.com/tekton-pipeline']
+        - name: BUILD_NUMBER
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['devops.cloud.ibm.com/build-number']
+        - name: PIPELINE_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['devops.cloud.ibm.com/pipeline-id']
+        - name: TRIGGER_TYPE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['devops.cloud.ibm.com/trigger-type']
+        - name: TRIGGER_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['devops.cloud.ibm.com/trigger-name']
+        - name: TRIGGERED_BY
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['devops.cloud.ibm.com/triggered-by']
       command: ["/bin/bash", "-c"]
       args:
         - |
@@ -71,9 +97,48 @@ spec:
           export HOME="/root"
           ##########################################################################
 
-          ls -l /scripts
+          # Ensure logging to the container registry and namespace available
+          source /scripts/check_registry.sh
 
-          cat /scripts/check_registry.sh
+          # Manage multiple tags for an image
+          # Add dynamically computed tags
+          printf "#!/bin/sh\n" > /steps/additionnalTags.sh
+          printf "%s " '$(inputs.params.additionalTagsScript)' >> /steps/additionnalTags.sh
+          chmod +x /steps/additionnalTags.sh
+          /steps/additionnalTags.sh 2 >& 1 > /steps/tags.lst
+          # Add image pipeline resource
+          if [ "${IMAGE_TAG}" ]; then
+            echo "${IMAGE_TAG}" >> /steps/tags.lst
+          fi
+          # Add tags provided using task parameter
+          if [ "$(inputs.params.additionalTags)" ];  then
+            echo "$(inputs.params.additionalTags)" | sed 's/,/\n/g' >> /steps/tags.lst
+          fi
+          echo "#######################"
+          echo "Image Tags:"
+          cat /steps/tags.lst
+          echo "#######################"
+          # Add the full image url with tags - use # as separator in case IMAGE_NAME contains /
+          sed -i "s#^#$REGISTRY_URL/$REGISTRY_NAMESPACE/$IMAGE_NAME:#" /steps/tags.lst
+          sort -u -o /steps/tags.lst /steps/tags.lst
+          echo "#######################"
+
+          if [ -s /steps/tags.lst ]; then
+            echo "Image tags:"
+            cat /steps/tags.lst
+          else
+            # Force a minimal tag for the image build
+            echo "$REGISTRY_URL/$REGISTRY_NAMESPACE/$IMAGE_NAME:latest" > /steps/tags.lst
+            echo "Define a minimal image tag: $REGISTRY_URL/$REGISTRY_NAMESPACE/$IMAGE_NAME:latest"
+          fi
+
+          # Build the image using ibmcloud cr build for the first tag in the file
+          ibmcloud cr build \
+            --file $(inputs.params.pathToDockerfile)/$(inputs.params.dockerfile) \
+            --tag $(head --num=1 /steps/tags.lst) \
+            $(inputs.params.pathToContext)
+
+          # Create remaining tags for the image
 
       volumeMounts:
         - mountPath: /cd-config
