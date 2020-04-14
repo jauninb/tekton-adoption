@@ -135,7 +135,7 @@ spec:
           # Build the image using ibmcloud cr build for the first tag in the file
           ibmcloud cr build \
             --file $(inputs.params.pathToDockerfile)/$(inputs.params.dockerfile) \
-            --tag $(head --num=1 /steps/tags.lst) \
+            --tag $(head --lines=1 /steps/tags.lst) \
             $(inputs.params.pathToContext)
 
           # Create remaining tags for the image
@@ -143,6 +143,8 @@ spec:
       volumeMounts:
         - mountPath: /cd-config
           name: cd-config-volume
+        - mountPath: /artifacts
+          name: task-volume
         - mountPath: /steps
           name: steps-volume
         - mountPath: /scripts
