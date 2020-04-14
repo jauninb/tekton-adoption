@@ -1,0 +1,102 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Task
+metadata:
+  name: cr-build-task
+spec:
+  inputs:
+    params:
+      - name: task-pvc
+        description: the task pvc - this is the volume where the files (Dockerfile etc..) are expected to be
+      - name: ibmcloudApi
+        description: the ibmcloud api
+        default: https://cloud.ibm.com
+      - name: continuous-delivery-context-secret
+        description: name of the configmap containing the continuous delivery pipeline context secrets
+        default: cd-secret
+      - name: container-registry-apikey-secret-key
+        description: field in the secret that contains the api key used to login to ibmcloud container registry
+        default: 'API_KEY'
+      - name: resourceGroup
+        description: target resource group (name or id) for the ibmcloud login operation
+        default: ''
+      - name: pathToContext
+        default: .
+      - name: pathToDockerfile
+        default: .
+      - name: dockerfile
+        description: The name of the Dockerfile
+        default: "Dockerfile"
+      - name: buildkit_image
+        description: The name of the BuildKit image
+        default: "moby/buildkit:v0.6.3-rootless"
+      - name: additionalTags
+        description: comma-separated list of additionalTags
+        # can not be defined as an array because of variable substition error for array
+        # https://github.com/tektoncd/pipeline/commit/86deacb04536f0f3e7176c6664cec8786678ed18
+        default: ''
+      - name: additionalTagsScript
+        description: Shell script that allows to add tags for the image to be build.
+        default: ''
+      - name: propertiesFile
+        description: file containing properties out of containerize task
+        default: build.properties
+    # resources:
+    #   # TODO consider an optional git repository as the source of the image to build
+    #   # when cd tekton support will be to tekton pipeline v 0.10
+    #   - name: workspace
+    #     type: git
+    #     optional: true
+  outputs:
+    resources:
+      - name: builtImage
+        type: image
+  steps:
+    - name: check-registry
+      image: ibmcom/pipeline-base-image:2.6
+      workingDir: /steps
+      env:
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: $(inputs.params.continuous-delivery-context-secret)
+              key: $(inputs.params.container-registry-apikey-secret-key)
+      command: ["/bin/bash", "-c"]
+      args:
+        - |
+          set -e -o pipefail
+          ##########################################################################
+          # Setting HOME explicitly to have ibmcloud plugins available
+          # doing the export rather than env definition is a workaround
+          # until https://github.com/tektoncd/pipeline/issues/1836 is fixed
+          export HOME="/root"
+          ##########################################################################
+
+          ls -l /scripts
+
+          cat /scripts/check_registry.sh
+
+      volumeMounts:
+        - mountPath: /cd-config
+          name: cd-config-volume
+        - mountPath: /steps
+          name: steps-volume
+        - mountPath: /scripts
+          name: check-registry-script
+  volumes:
+    - name: steps-volume
+      emptyDir: {}
+    - name: task-volume
+      persistentVolumeClaim:
+        claimName: $(inputs.params.task-pvc)
+    - name: cd-config-volume
+      configMap:
+        name: toolchain
+        items:
+        - key: toolchain.json
+          path: toolchain.json
+    - name: check-registry-script
+      configmap: 
+        name: check-registry-script
+        items: 
+        - key: check_registry.sh
+          path: check_registry.sh
