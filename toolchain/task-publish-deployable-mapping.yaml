@@ -127,7 +127,9 @@ spec:
 
         curl -H "accept: application/json" -H "Authorization: ${TOKEN}" \
           https://otc-api.${$TOOLCHAIN_REGION}.cloud.ibm.com/api/v1/toolchain_deployable_mappings?toolchain_guid=${TOOLCHAIN_ID}
-
+      volumeMounts:
+        - mountPath: /cd-config
+          name: cd-config-volume
   volumes:
     - name: steps-volume
       emptyDir: {}
