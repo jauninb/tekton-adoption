@@ -135,6 +135,8 @@ spec:
         EXISTING_DEPLOYABLE_MAPPING=$(curl -H "accept: application/json" -H "Authorization: ${TOKEN}" \
           "$OTC_API_DM_URL?toolchain_guid=${TOOLCHAIN_ID}&deployable_guid=${DEPL}" | jq -r '.items[0].mapping_guid')
 
+        echo "Existing deployable mapping id found: $EXISTING_DEPLOYABLE_MAPPING"
+
         if [ "$EXISTING_DEPLOYABLE_MAPPING" == "null" ]; then
           HTTP_VERB="POST"
           URL_DM_SEGMENT=""
