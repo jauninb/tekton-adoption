@@ -19,6 +19,8 @@ spec:
           value: "toolchain-apikey"
         - name: cluster-name
           value: $(params.cluster-name)
+        - name: cluster-and-worker-nodes-json-export
+          value: "theexport"
       workspaces:
         - name: workspace
           workspace: pipeline-ws
