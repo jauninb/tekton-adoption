@@ -1,0 +1,133 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: otc-publish-deployable-mapping
+spec:
+  params:
+    - name: deployable-type
+      description: type of the deployable. Can be either `app` for a CF application or `kubernetes_cluster` for K8S deployment
+    - name: deployable-region-id
+      description: fully qualified IBM Cloud Region where the deployable is located (such as ibm:yp:us-south)
+    - name: deployable-guid
+      description: GUID of the deployable
+    - name: deployable-cf-org-id
+      default: ""
+    - name: deployable-cf-space-id
+      default: ""
+    - name: deployable-rg-id
+      default: ""
+    - name: ibmcloud-api
+      description: the ibmcloud api
+      default: https://cloud.ibm.com
+    - name: continuous-delivery-context-secret
+      description: name of the configmap containing the continuous delivery pipeline context secrets
+      default: "secure-properties"
+    - name: toolchain-apikey-secret-key
+      description: field in the secret that contains the api key used to access toolchain and DOI instance
+      default: "toolchain-apikey"
+    - name: pipeline-debug
+      description: Pipeline debug mode
+      default: "0"
+  steps:
+    - name: publish-deployable-mapping
+      image: ibmcom/pipeline-base-image:2.6
+      env:
+        - name: IBM_CLOUD_API
+          value: $(params.ibmcloud-api)
+        - name: IBM_CLOUD_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: $(params.continuous-delivery-context-secret)
+              key: $(params.toolchain-apikey-secret-key)
+              optional: true
+        - name: PIPELINE_DEBUG
+          value: $(params.pipeline-debug)
+      script: |
+        #!/bin/bash
+        set -e -o pipefail
+        if [ $PIPELINE_DEBUG == 1 ]; then
+            pwd
+            env
+            trap env EXIT
+            set -x
+        fi
+        ##########################################################################
+        # Setting HOME explicitly to have ibmcloud plugins available
+        # doing the export rather than env definition is a workaround
+        # until https://github.com/tektoncd/pipeline/issues/1836 is fixed
+        export HOME="/root"
+        ##########################################################################
+        TOOLCHAIN_ID=$(jq -r '.toolchain_guid' /cd-config/toolchain.json)
+        TOOLCHAIN_REGION_ID=$(jq -r '.region_id' /cd-config/toolchain.json)
+        TOOLCHAIN_REGION=$(jq -r '.region_id' /cd-config/toolchain.json | awk -F: '{print $3}')
+
+        ibmcloud config --check-version false
+        ibmcloud login -a $(params.ibmcloud-api) -r $TOOLCHAIN_REGION --apikey $IBM_CLOUD_API_KEY
+        TOKEN=$(ibmcloud iam oauth-tokens --output JSON | jq -r '.iam_token')
+
+        # For a "app" - ie CF App
+        # 'deployable': {
+        #     'type': 'app',
+        #     'region_id': '${TARGET_REGION_ID}',
+        #     'deployable_guid': '6e3bc311-c83d-4cd1-a457-99d9a5f20f19',
+        #     'organization_guid': '8d34d127-d3db-43cd-808b-134b388f1646',
+        #     'space_guid': '5f9f2e5f-610c-4013-b34c-84c6bf4ccf30'
+        # },
+
+        # For a "kubernetes_cluster"
+        # "deployable": {
+        #   "type": "kubernetes_cluster",
+        #   "region_id": "ibm:yp:us-south",
+        #   "deployable_guid": "e49bfff2280240a8b11d2067b854fdef",
+        #   "container": {
+        #       "guid": "62cfaf6e56fb431f88f2a2116ada78f0",
+        #       "type": "resource_group_id"
+        #   }
+
+        #
+        # "toolchain": {
+        #   "toolchain_guid": "string",
+        #   "region_id": "ibm:ys1:us-south"
+        # },
+        # "source": {
+        #   "type": "service_instance",
+        #   "source_guid": "1bf412f6-a671-4b4d-a978-90da0e2d71e6"
+        # },
+
+        echo "{}" | jq '.deployable={} | .toolchain={} | .source={}' > deployable_mapping.json
+
+        cat deployable_mapping.json | jq --arg DEPLOYABLE_TYPE "$DEPLOYABLE_TYPE" --arg REGION_ID "$DEPLOYABLE_REGION_ID" --arg DEPLOYABLE_GUID "$DEPLOYABLE_GUID" \
+          '.deployable.type=$DEPLOYABLE_TYPE | .deployable.region_id=$REGION_ID | .deployable.deployable_guid=$DEPLOYABLE_GUID' > deployable_mapping.json
+
+        if [ "$DEPLOYABLE_TYPE" == "app" ]; then
+          cat deployable_mapping.json | jq --arg ORG_ID "$(params.deployable-cf-org-id)" --arg SPACE_ID "$(params.deployable-cf-space-id)" \
+            '.deployable.organization_guid=$ORG_ID | .deployable.space_guid=$SPACE_ID' > deployable_mapping.json
+        elif [ "$DEPLOYABLE_TYPE" == "kubernetes_cluster" ]; then
+          cat deployable_mapping.json | jq --arg RG_ID "$(params.deployable-rg-id)" \
+            '.deployable.container={} | deployable.container.guid=$RG_ID | .deployable.container.type="resource_group_id"' > deployable_mapping.json
+        else
+          echo "Deployable type $DEPLOYABLE_TYPE not expected"
+          exit 1
+        fi
+
+        cat deployable_mapping.json | jq --arg TC_ID "$TOOLCHAIN_ID" --arg REGION_ID "$TOOLCHAIN_REGION_ID" \
+          '.toolchain.toolchain_guid=$TC_ID | .toolchain.region_id=$REGION_ID ' > deployable_mapping.json
+
+        cat deployable_mapping.json | jq --arg PIPELINE_ID "$PIPELINE_ID" \
+          '.source.type="service_instance" | .source.source_guid=$PIPELINE_ID ' > deployable_mapping.json
+
+        curl -X POST -H "Authorization: ${TOKEN}" -H "content-type: application/json" -d @deployable_mapping.json \
+          https://otc-api.${$TOOLCHAIN_REGION}.cloud.ibm.com/api/v1/toolchain_deployable_mappings?toolchain_guid=${TOOLCHAIN_ID}
+
+        curl -H "accept: application/json" -H "Authorization: ${TOKEN}" \
+          https://otc-api.${$TOOLCHAIN_REGION}.cloud.ibm.com/api/v1/toolchain_deployable_mappings?toolchain_guid=${TOOLCHAIN_ID}
+
+  volumes:
+    - name: steps-volume
+      emptyDir: {}
+    - name: cd-config-volume
+      configMap:
+        name: toolchain
+        items:
+          - key: toolchain.json
+            path: toolchain.json
