@@ -133,7 +133,7 @@ spec:
         OTC_API_DM_URL="https://otc-api.${TOOLCHAIN_REGION}.devops.cloud.ibm.com/api/v1/toolchain_deployable_mappings"
         # Check if an existing mapping exist with the given deployable guid in toolchain
         EXISTING_DEPLOYABLE_MAPPING=$(curl -H "accept: application/json" -H "Authorization: ${TOKEN}" \
-          "$OTC_API_DM_URL?toolchain_guid=${TOOLCHAIN_ID}&deployable_guid=${DEPL}" | jq -e '.items[0].mapping_guid')
+          "$OTC_API_DM_URL?toolchain_guid=${TOOLCHAIN_ID}&deployable_guid=${DEPL}" | jq -r '.items[0].mapping_guid')
 
         if [ "$EXISTING_DEPLOYABLE_MAPPING" == "null" ]; then
           HTTP_VERB="POST"
@@ -145,7 +145,7 @@ spec:
 
         echo "Doing cURL -X $HTTP_VERB $OTC_API_DM_URL$URL_DM_SEGMENT with json payload:"
         cat deployable_mapping.json
-        
+
         curl -is -X $HTTP_VERB -H "Authorization: ${TOKEN}" -H "content-type: application/json" \
           -d @deployable_mapping.json $OTC_API_DM_URL$URL_DM_SEGMENT
 
