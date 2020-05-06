@@ -102,21 +102,17 @@ spec:
 
         echo "{}" | jq '.deployable={} | .toolchain={} | .source={}' > deployable_mapping.json
 
-        cat deployable_mapping.json
-
         cat deployable_mapping.json | jq --arg DEPLOYABLE_TYPE "$DEPLOYABLE_TYPE" --arg REGION_ID "$(params.deployable-region-id)" --arg DEPLOYABLE_GUID "$(params.deployable-guid)" \
           '.deployable.type=$DEPLOYABLE_TYPE | .deployable.region_id=$REGION_ID | .deployable.deployable_guid=$DEPLOYABLE_GUID' > tmp_deployable_mapping.json
         mv -f tmp_deployable_mapping.json deployable_mapping.json
 
-        cat deployable_mapping.json
-        
         if [ "$DEPLOYABLE_TYPE" == "app" ]; then
           cat deployable_mapping.json | jq --arg ORG_ID "$(params.deployable-cf-org-id)" --arg SPACE_ID "$(params.deployable-cf-space-id)" \
             '.deployable.organization_guid=$ORG_ID | .deployable.space_guid=$SPACE_ID' > tmp_deployable_mapping.json
           mv -f tmp_deployable_mapping.json deployable_mapping.json
-        elif [ "$DEPLOYABLE_TYPE" == "kubernetes_cluster" ]; then
+        elif [ "$DEPLOYABLE_TYPE" == "kubernetes_cluster" ]; then          
           cat deployable_mapping.json | jq --arg RG_ID "$(params.deployable-rg-id)" \
-            '.deployable.container={} | deployable.container.guid=$RG_ID | .deployable.container.type="resource_group_id"' > tmp_deployable_mapping.json
+            '.deployable.container={} | .deployable.container.guid=$RG_ID | .deployable.container.type="resource_group_id"' > tmp_deployable_mapping.json
           mv -f tmp_deployable_mapping.json deployable_mapping.json
         else
           echo "Deployable type $DEPLOYABLE_TYPE not expected"
