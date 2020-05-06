@@ -32,6 +32,10 @@ spec:
             value: $(params.cluster-name)
           - name: pipeline-debug
             value: $(params.pipeline-debug)
+        workspaces:
+          - name: pipeline-ws
+            persistentVolumeClaim:
+              claimName: toolchain-dm-k8s-$(uid)-pvc
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: TriggerBinding

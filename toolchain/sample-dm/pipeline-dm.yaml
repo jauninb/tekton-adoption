@@ -6,6 +6,8 @@ spec:
   params:
     - name: cluster-name
     - name: pipeline-debug
+  workspaces:
+    - name: pipeline-ws
   tasks:
     - name: fetch-cluster-config-task
       taskRef:
@@ -17,6 +19,9 @@ spec:
           value: "toolchain-apikey"
         - name: cluster-name
           value: $(params.cluster-name)
+      workspaces:
+        - name: workspace
+          workspace: pipeline-ws
     - name: publish-deployable-task
       taskRef:
         name: otc-publish-deployable-mapping
