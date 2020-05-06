@@ -102,7 +102,7 @@ spec:
 
         echo "{}" | jq '.deployable={} | .toolchain={} | .source={}' > deployable_mapping.json
 
-        cat deployable_mapping.json | jq --arg DEPLOYABLE_TYPE "$DEPLOYABLE_TYPE" --arg REGION_ID "$(params.deployable-region-id)" --arg DEPLOYABLE_GUID ""$(params.deployable-guid)" \
+        cat deployable_mapping.json | jq --arg DEPLOYABLE_TYPE "$DEPLOYABLE_TYPE" --arg REGION_ID "$(params.deployable-region-id)" --arg DEPLOYABLE_GUID "$(params.deployable-guid)" \
           '.deployable.type=$DEPLOYABLE_TYPE | .deployable.region_id=$REGION_ID | .deployable.deployable_guid=$DEPLOYABLE_GUID' > deployable_mapping.json
 
         if [ "$DEPLOYABLE_TYPE" == "app" ]; then
