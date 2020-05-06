@@ -147,11 +147,18 @@ spec:
         echo "Doing cURL -X $HTTP_VERB $OTC_API_DM_URL$URL_DM_SEGMENT with json payload:"
         cat deployable_mapping.json
 
-        curl -is -X $HTTP_VERB -H "Authorization: ${TOKEN}" -H "content-type: application/json" \
-          -d @deployable_mapping.json $OTC_API_DM_URL$URL_DM_SEGMENT
+        HTTP_STATUS_CODE=$(
+          curl -s -o /dev/null -w '%{http_code}' -X $HTTP_VERB \
+          -H "Authorization: ${TOKEN}" -H "content-type: application/json" \
+          -d @deployable_mapping.json $OTC_API_DM_URL$URL_DM_SEGMENT \
+        )
 
-        curl -H "accept: application/json" -H "Authorization: ${TOKEN}" \
-          $OTC_API_DM_URL?toolchain_guid=${TOOLCHAIN_ID}
+        if [ "$HTTP_STATUS_CODE" == "201" ] || [ "$HTTP_STATUS_CODE" == "204" ]; then
+          echo "Deployable mapping created"
+        else
+          echo "Fail to create deployable mapping ! HTTP Status code = $HTTP_STATUS_CODE"
+          exit 1
+        fi
       volumeMounts:
         - mountPath: /cd-config
           name: cd-config-volume
