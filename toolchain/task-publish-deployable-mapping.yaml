@@ -32,6 +32,10 @@ spec:
     - name: publish-deployable-mapping
       image: ibmcom/pipeline-base-image:2.6
       env:
+        - name: PIPELINE_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.annotations['devops.cloud.ibm.com/pipeline-id']
         - name: IBM_CLOUD_API
           value: $(params.ibmcloud-api)
         - name: IBM_CLOUD_API_KEY
@@ -94,9 +98,11 @@ spec:
         #   "source_guid": "1bf412f6-a671-4b4d-a978-90da0e2d71e6"
         # },
 
+        DEPLOYABLE_TYPE="$(params.deployable-type)"
+
         echo "{}" | jq '.deployable={} | .toolchain={} | .source={}' > deployable_mapping.json
 
-        cat deployable_mapping.json | jq --arg DEPLOYABLE_TYPE "$DEPLOYABLE_TYPE" --arg REGION_ID "$DEPLOYABLE_REGION_ID" --arg DEPLOYABLE_GUID "$DEPLOYABLE_GUID" \
+        cat deployable_mapping.json | jq --arg DEPLOYABLE_TYPE "$DEPLOYABLE_TYPE" --arg REGION_ID "$(params.deployable-region-id)" --arg DEPLOYABLE_GUID ""$(params.deployable-guid)" \
           '.deployable.type=$DEPLOYABLE_TYPE | .deployable.region_id=$REGION_ID | .deployable.deployable_guid=$DEPLOYABLE_GUID' > deployable_mapping.json
 
         if [ "$DEPLOYABLE_TYPE" == "app" ]; then
