@@ -102,41 +102,33 @@ spec:
 
         echo "{}" | jq '.deployable={} | .toolchain={} | .source={}' > deployable_mapping.json
 
-        echo "1 - cat deployable_mapping.json"
-        cat deployable_mapping.json
-
         cat deployable_mapping.json | jq --arg DEPLOYABLE_TYPE "$DEPLOYABLE_TYPE" --arg REGION_ID "$(params.deployable-region-id)" --arg DEPLOYABLE_GUID "$(params.deployable-guid)" \
-          '.deployable.type=$DEPLOYABLE_TYPE | .deployable.region_id=$REGION_ID | .deployable.deployable_guid=$DEPLOYABLE_GUID' > deployable_mapping.json
-
-        echo "2 - cat deployable_mapping.json"
-        cat deployable_mapping.json
+          '.deployable.type=$DEPLOYABLE_TYPE | .deployable.region_id=$REGION_ID | .deployable.deployable_guid=$DEPLOYABLE_GUID' > tmp_deployable_mapping.json
+        mv -f tmp_deployable_mapping.json deployable_mapping.json
 
         if [ "$DEPLOYABLE_TYPE" == "app" ]; then
           cat deployable_mapping.json | jq --arg ORG_ID "$(params.deployable-cf-org-id)" --arg SPACE_ID "$(params.deployable-cf-space-id)" \
-            '.deployable.organization_guid=$ORG_ID | .deployable.space_guid=$SPACE_ID' > deployable_mapping.json
+            '.deployable.organization_guid=$ORG_ID | .deployable.space_guid=$SPACE_ID' > tmp_deployable_mapping.json
+          mv -f tmp_deployable_mapping.json deployable_mapping.json
         elif [ "$DEPLOYABLE_TYPE" == "kubernetes_cluster" ]; then
           cat deployable_mapping.json | jq --arg RG_ID "$(params.deployable-rg-id)" \
-            '.deployable.container={} | deployable.container.guid=$RG_ID | .deployable.container.type="resource_group_id"' > deployable_mapping.json
+            '.deployable.container={} | deployable.container.guid=$RG_ID | .deployable.container.type="resource_group_id"' > tmp_deployable_mapping.json
+          mv -f tmp_deployable_mapping.json deployable_mapping.json
         else
           echo "Deployable type $DEPLOYABLE_TYPE not expected"
           exit 1
         fi
 
-        echo "3 - cat deployable_mapping.json"
-        cat deployable_mapping.json
-
         cat deployable_mapping.json | jq --arg TC_ID "$TOOLCHAIN_ID" --arg REGION_ID "$TOOLCHAIN_REGION_ID" \
-          '.toolchain.toolchain_guid=$TC_ID | .toolchain.region_id=$REGION_ID ' > deployable_mapping.json
-
-        echo "4 - cat deployable_mapping.json"
-        cat deployable_mapping.json
+          '.toolchain.toolchain_guid=$TC_ID | .toolchain.region_id=$REGION_ID ' > tmp_deployable_mapping.json
+        mv -f tmp_deployable_mapping.json deployable_mapping.json
 
         cat deployable_mapping.json | jq --arg PIPELINE_ID "$PIPELINE_ID" \
-          '.source.type="service_instance" | .source.source_guid=$PIPELINE_ID ' > deployable_mapping.json
+          '.source.type="service_instance" | .source.source_guid=$PIPELINE_ID ' > tmp_deployable_mapping.json
+        mv -f tmp_deployable_mapping.json deployable_mapping.json
 
-        echo "5 - cat deployable_mapping.json"
         cat deployable_mapping.json
-
+        
         curl -X POST -H "Authorization: ${TOKEN}" -H "content-type: application/json" -d @deployable_mapping.json \
           https://otc-api.${$TOOLCHAIN_REGION}.cloud.ibm.com/api/v1/toolchain_deployable_mappings?toolchain_guid=${TOOLCHAIN_ID}
 
