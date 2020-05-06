@@ -1,15 +1,10 @@
 apiVersion: tekton.dev/v1beta1
 kind: TriggerTemplate
 metadata:
-  name: toolchain-dm
+  name: toolchain-dm-k8s
 spec:
   params:
-    - name: deployable-type
-    - name: deployable-region-id
-    - name: deployable-guid
-    - name: deployable-cf-org-id
-    - name: deployable-cf-space-id
-    - name: deployable-rg-id
+    - name: cluster-name
     - name: pipeline-debug
       default: "0"
   resourcetemplates:
@@ -17,7 +12,7 @@ spec:
     - apiVersion: v1
       kind: PersistentVolumeClaim
       metadata:
-        name: toolchain-dm-$(uid)-pvc
+        name: toolchain-dm-k8s-$(uid)-pvc
       spec:
         resources:
           requests:
@@ -28,52 +23,34 @@ spec:
     - apiVersion: tekton.dev/v1alpha1
       kind: PipelineRun
       metadata:
-        name: toolchain-dm-$(uid)
+        name: toolchain-dm-k8s-$(uid)
       spec:
         pipelineRef:
-          name: toolchain-dm
+          name: toolchain-dm-k8s
         params:
-          - name: deployable-type
-            value: $(params.deployable-type)
-          - name: deployable-region-id
-            value: $(params.deployable-region-id)
-          - name: deployable-guid
-            value: $(params.deployable-guid)
-          - name: deployable-cf-org-id
-            value: $(params.deployable-cf-org-id)
-          - name: deployable-cf-space-id
-            value: $(params.deployable-cf-space-id)
-          - name: deployable-rg-id
-            value: $(params.deployable-rg-id)
+          - name: cluster-name
+            value: $(params.cluster-name)
           - name: pipeline-debug
             value: $(params.pipeline-debug)
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: TriggerBinding
 metadata:
-  name: toolchain-dm
+  name: toolchain-dm-k8s
 spec:
   params:
-    - name: deployable-type
-      value: $(params.deployable-type)
-    - name: deployable-region-id
-      value: $(params.deployable-region-id)
-    - name: deployable-guid
-      value: $(params.deployable-guid)
-    - name: deployable-cf-org-id
-      value: $(params.deployable-cf-org-id)
-    - name: deployable-cf-space-id
-      value: $(params.deployable-cf-space-id)
-    - name: deployable-rg-id
-      value: $(params.deployable-rg-id)
+    - name: cluster-name
+      value: $(params.cluster-name)
+    - name: pipeline-debug
+      value: $(params.pipeline-debug)
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: EventListener
 metadata:
-  name: toolchain-dm
+  name: toolchain-dm-k8s
 spec:
   triggers:
     - binding:
-        name: toolchain-dm
+        name: toolchain-dm-k8s
       template:
-        name: toolchain-dm
+        name: toolchain-dm-k8s

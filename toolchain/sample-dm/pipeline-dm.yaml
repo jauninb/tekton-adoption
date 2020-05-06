@@ -1,32 +1,33 @@
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
-  name: toolchain-dm
+  name: toolchain-dm-k8s
 spec:
   params:
-    - name: deployable-type
-    - name: deployable-region-id
-    - name: deployable-guid
-    - name: deployable-cf-org-id
-    - name: deployable-cf-space-id
-    - name: deployable-rg-id
+    - name: cluster-name
     - name: pipeline-debug
   tasks:
+    - name: fetch-cluster-config-task
+      taskRef:
+        name: iks-fetch-config
+      params:
+        - name: continuous-delivery-context-secret
+          value: "secure-properties"
+        - name: kubernetes-service-apikey-secret-key
+          value: "toolchain-apikey"
+        - name: cluster-name
+          value: $(params.cluster-name)
     - name: publish-deployable-task
       taskRef:
         name: otc-publish-deployable-mapping
       params:
         - name: deployable-type
-          value: $(params.deployable-type)
+          value: "kubernetes_cluster"
         - name: deployable-region-id
-          value: $(params.deployable-region-id)
+          value: "ibm:yp:$(tasks.fetch-cluster-config-task.results.cluster-region)"
         - name: deployable-guid
-          value: $(params.deployable-guid)
-        - name: deployable-cf-org-id
-          value: $(params.deployable-cf-org-id)
-        - name: deployable-cf-space-id
-          value: $(params.deployable-cf-space-id)
+          value: $(tasks.fetch-cluster-config-task.results.cluster-id)
         - name: deployable-rg-id
-          value: $(params.deployable-rg-id)
+          value: $(tasks.fetch-cluster-config-task.results.resource-group-id)
         - name: pipeline-debug
           value: $(params.pipeline-debug)
