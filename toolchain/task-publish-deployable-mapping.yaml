@@ -130,10 +130,10 @@ spec:
         cat deployable_mapping.json
 
         curl -X POST -H "Authorization: ${TOKEN}" -H "content-type: application/json" -d @deployable_mapping.json \
-          https://otc-api.${TOOLCHAIN_REGION}.cloud.ibm.com/api/v1/toolchain_deployable_mappings?toolchain_guid=${TOOLCHAIN_ID}
+          https://otc-api.${TOOLCHAIN_REGION}.devops.cloud.ibm.com/api/v1/toolchain_deployable_mappings?toolchain_guid=${TOOLCHAIN_ID}
 
         curl -H "accept: application/json" -H "Authorization: ${TOKEN}" \
-          https://otc-api.${TOOLCHAIN_REGION}.cloud.ibm.com/api/v1/toolchain_deployable_mappings?toolchain_guid=${TOOLCHAIN_ID}
+          https://otc-api.${TOOLCHAIN_REGION}.devops.cloud.ibm.com/api/v1/toolchain_deployable_mappings?toolchain_guid=${TOOLCHAIN_ID}
       volumeMounts:
         - mountPath: /cd-config
           name: cd-config-volume
