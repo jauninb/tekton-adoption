@@ -99,10 +99,11 @@ spec:
         # },
 
         DEPLOYABLE_TYPE="$(params.deployable-type)"
+        DEPLOYABLE_GUID="$(params.deployable-guid)"
 
         echo "{}" | jq '.deployable={} | .toolchain={} | .source={}' > deployable_mapping.json
 
-        cat deployable_mapping.json | jq --arg DEPLOYABLE_TYPE "$DEPLOYABLE_TYPE" --arg REGION_ID "$(params.deployable-region-id)" --arg DEPLOYABLE_GUID "$(params.deployable-guid)" \
+        cat deployable_mapping.json | jq --arg DEPLOYABLE_TYPE "$DEPLOYABLE_TYPE" --arg REGION_ID "$(params.deployable-region-id)" --arg DEPLOYABLE_GUID "$DEPLOYABLE_GUID" \
           '.deployable.type=$DEPLOYABLE_TYPE | .deployable.region_id=$REGION_ID | .deployable.deployable_guid=$DEPLOYABLE_GUID' > tmp_deployable_mapping.json
         mv -f tmp_deployable_mapping.json deployable_mapping.json
 
@@ -129,11 +130,23 @@ spec:
 
         cat deployable_mapping.json
 
-        curl -X POST -H "Authorization: ${TOKEN}" -H "content-type: application/json" -d @deployable_mapping.json \
-          https://otc-api.${TOOLCHAIN_REGION}.devops.cloud.ibm.com/api/v1/toolchain_deployable_mappings?toolchain_guid=${TOOLCHAIN_ID}
+        OTC_API_DM_URL="https://otc-api.${TOOLCHAIN_REGION}.devops.cloud.ibm.com/api/v1/toolchain_deployable_mappings"
+        # Check if an existing mapping exist with the given deployable guid in toolchain
+        EXISTING_DEPLOYABLE_MAPPING=$(curl -H "accept: application/json" -H "Authorization: ${TOKEN}" \
+          "$OTC_API_DM_URL?toolchain_guid=${TOOLCHAIN_ID}&deployable_guid=${DEPL}" | jq -e '.items[0].mapping_guid')
+
+        if [ "$EXISTING_DEPLOYABLE_MAPPING" == "null" ]; then
+          HTTP_VERB="POST"
+          URL_DM_SEGMENT=""
+        else
+          HTTP_VERB="PUT"
+          URL_DM_SEGMENT="/$EXISTING_DEPLOYABLE_MAPPING"
+        fi
+        curl -is -X $HTTP_VERB -H "Authorization: ${TOKEN}" -H "content-type: application/json" -d @deployable_mapping.json \
+          $OTC_API_DM_URL/$URL_DM_SEGMENT?toolchain_guid=${TOOLCHAIN_ID}
 
         curl -H "accept: application/json" -H "Authorization: ${TOKEN}" \
-          https://otc-api.${TOOLCHAIN_REGION}.devops.cloud.ibm.com/api/v1/toolchain_deployable_mappings?toolchain_guid=${TOOLCHAIN_ID}
+          $OTC_API_DM_URL?toolchain_guid=${TOOLCHAIN_ID}
       volumeMounts:
         - mountPath: /cd-config
           name: cd-config-volume
