@@ -142,8 +142,12 @@ spec:
           HTTP_VERB="PUT"
           URL_DM_SEGMENT="/$EXISTING_DEPLOYABLE_MAPPING"
         fi
-        curl -is -X $HTTP_VERB -H "Authorization: ${TOKEN}" -H "content-type: application/json" -d @deployable_mapping.json \
-          $OTC_API_DM_URL/$URL_DM_SEGMENT?toolchain_guid=${TOOLCHAIN_ID}
+
+        echo "Doing cURL -X $HTTP_VERB $OTC_API_DM_URL$URL_DM_SEGMENT with json payload:"
+        cat deployable_mapping.json
+        
+        curl -is -X $HTTP_VERB -H "Authorization: ${TOKEN}" -H "content-type: application/json" \
+          -d @deployable_mapping.json $OTC_API_DM_URL$URL_DM_SEGMENT
 
         curl -H "accept: application/json" -H "Authorization: ${TOKEN}" \
           $OTC_API_DM_URL?toolchain_guid=${TOOLCHAIN_ID}
