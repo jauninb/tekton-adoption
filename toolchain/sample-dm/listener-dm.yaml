@@ -10,6 +10,8 @@ spec:
     - name: deployable-cf-org-id
     - name: deployable-cf-space-id
     - name: deployable-rg-id
+    - name: pipeline-debug
+      default: "0"
   resourcetemplates:
     # PVC definition like pre-tekton-0.10.1
     - apiVersion: v1
@@ -43,6 +45,8 @@ spec:
             value: $(params.deployable-cf-space-id)
           - name: deployable-rg-id
             value: $(params.deployable-rg-id)
+          - name: pipeline-debug
+            value: $(params.pipeline-debug)
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: TriggerBinding

@@ -10,6 +10,7 @@ spec:
     - name: deployable-cf-org-id
     - name: deployable-cf-space-id
     - name: deployable-rg-id
+    - name: pipeline-debug
   tasks:
     - name: publish-deployable-task
       taskRef:
@@ -27,3 +28,5 @@ spec:
           value: $(params.deployable-cf-space-id)
         - name: deployable-rg-id
           value: $(params.deployable-rg-id)
+        - name: pipeline-debug
+          value: $(params.pipeline-debug)
