@@ -6,10 +6,16 @@ metadata:
 spec:
   params:
     - name: region
+      description: |
+        (optional) Name of the region for IBM Public Cloud Cloud Foundry operation.
+        Will default to the toolchain region if none or empty value.
       default: ""
     - name: cf-org
+      description: Name of organization to be targeted
     - name: cf-space
+      description: Name of space to be targeted
     - name: cf-app
+      description: Name of the CF application to be managed
     - name: cf-commands
       description: The ibmcloud cf command(s) to run.
       default: |
@@ -29,13 +35,18 @@ spec:
       default: "0"
   results:
     - name: region
+      description: Name of the region where Cloud Foundry commands were executed
     - name: cf-target-url
-    - name: cf-space-id
+      description:  Cloud Foundry API endpoint
     - name: cf-org-id
+      description:  Id of the Cloud Foundry organization
+    - name: cf-space-id
+      description:  Id of the Cloud Foundry space
     - name: cf-app-guid
+      description:  GUID of the Cloud Foundry application managed using this tasks
   workspaces:
     - name: source
-      description: A workspace containing the source of the application to deploy
+      description: A workspace containing the source of the CF application to deploy
       mountPath: /artifacts
   steps:
     - name: deploy-cf-app
