@@ -17,12 +17,15 @@ spec:
        A fully qualified id is expected (such as ibm:yp:us-south)
        If not fully qualified, the ibmcloud production prefix is appended (ie 'ibm:yp:')
     - name: deployable-guid
-      description: GUID of the deployable
+      description: GUID of the deployable (either cluster guid or cf app guid)
     - name: deployable-cf-org-id
+      description: CF organization id (only required when deployable-type is `app`)
       default: ""
     - name: deployable-cf-space-id
+      description: CF space id (only required when deployable-type is `app`)
       default: ""
     - name: deployable-rg-id
+      description: Resource Group id (only required when deployable-type is `kubernetes_cluster`)
       default: ""
     - name: ibmcloud-api
       description: the ibmcloud api
