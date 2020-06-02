@@ -1,11 +1,16 @@
+---
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: otc-publish-deployable-mapping
+  name: toolchain-publish-deployable-mapping
 spec:
   params:
     - name: deployable-type
-      description: type of the deployable. Can be either `app` for a CF application or `kubernetes_cluster` for K8S deployment
+      description: |
+        type of the deployable. Can be either:
+        - `app` for a CF application
+        or
+        - `kubernetes_cluster` for K8S deployment
     - name: deployable-region-id
       description: fully qualified IBM Cloud Region where the deployable is located (such as ibm:yp:us-south)
     - name: deployable-guid
@@ -103,17 +108,22 @@ spec:
 
         echo "{}" | jq '.deployable={} | .toolchain={} | .source={}' > deployable_mapping.json
 
-        cat deployable_mapping.json | jq --arg DEPLOYABLE_TYPE "$DEPLOYABLE_TYPE" --arg REGION_ID "$(params.deployable-region-id)" --arg DEPLOYABLE_GUID "$DEPLOYABLE_GUID" \
-          '.deployable.type=$DEPLOYABLE_TYPE | .deployable.region_id=$REGION_ID | .deployable.deployable_guid=$DEPLOYABLE_GUID' > tmp_deployable_mapping.json
+        cat deployable_mapping.json | \
+        jq --arg DEPL_TYPE "$DEPLOYABLE_TYPE" --arg REGION_ID "$(params.deployable-region-id)" \
+           --arg DEPL_GUID "$DEPLOYABLE_GUID" \
+          '.deployable.type=$DEPL_TYPE | .deployable.region_id=$REGION_ID | .deployable.deployable_guid=$DEPL_GUID' \
+          > tmp_deployable_mapping.json
         mv -f tmp_deployable_mapping.json deployable_mapping.json
 
         if [ "$DEPLOYABLE_TYPE" == "app" ]; then
-          cat deployable_mapping.json | jq --arg ORG_ID "$(params.deployable-cf-org-id)" --arg SPACE_ID "$(params.deployable-cf-space-id)" \
+          cat deployable_mapping.json | jq --arg ORG_ID "$(params.deployable-cf-org-id)" \
+            --arg SPACE_ID "$(params.deployable-cf-space-id)" \
             '.deployable.organization_guid=$ORG_ID | .deployable.space_guid=$SPACE_ID' > tmp_deployable_mapping.json
           mv -f tmp_deployable_mapping.json deployable_mapping.json
-        elif [ "$DEPLOYABLE_TYPE" == "kubernetes_cluster" ]; then          
+        elif [ "$DEPLOYABLE_TYPE" == "kubernetes_cluster" ]; then
           cat deployable_mapping.json | jq --arg RG_ID "$(params.deployable-rg-id)" \
-            '.deployable.container={} | .deployable.container.guid=$RG_ID | .deployable.container.type="resource_group_id"' > tmp_deployable_mapping.json
+            '.deployable.container={} | .deployable.container.guid=$RG_ID | .deployable.container.type="resource_group_id"' \
+            > tmp_deployable_mapping.json
           mv -f tmp_deployable_mapping.json deployable_mapping.json
         else
           echo "Deployable type $DEPLOYABLE_TYPE not expected"
@@ -133,7 +143,8 @@ spec:
         OTC_API_DM_URL="https://otc-api.${TOOLCHAIN_REGION}.devops.cloud.ibm.com/api/v1/toolchain_deployable_mappings"
         # Check if an existing mapping exist with the given deployable guid in toolchain
         EXISTING_DEPLOYABLE_MAPPING=$(curl -H "accept: application/json" -H "Authorization: ${TOKEN}" \
-          "$OTC_API_DM_URL?toolchain_guid=${TOOLCHAIN_ID}&deployable_guid=${DEPLOYABLE_GUID}" | jq -r '.items[0].mapping_guid')
+          "$OTC_API_DM_URL?toolchain_guid=${TOOLCHAIN_ID}&deployable_guid=${DEPLOYABLE_GUID}" | \
+          jq -r '.items[0].mapping_guid')
 
         if [ "$EXISTING_DEPLOYABLE_MAPPING" == "null" ]; then
           HTTP_VERB="POST"

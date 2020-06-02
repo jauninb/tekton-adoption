@@ -1,3 +1,4 @@
+---
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
@@ -26,7 +27,7 @@ spec:
           workspace: pipeline-ws
     - name: publish-deployable-task
       taskRef:
-        name: otc-publish-deployable-mapping
+        name: toolchain-publish-deployable-mapping
       params:
         - name: deployable-type
           value: "kubernetes_cluster"
