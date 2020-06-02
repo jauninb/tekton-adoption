@@ -31,14 +31,14 @@ spec:
             # only dump list of cf apps
             ibmcloud cf apps
       workspaces:
-        - name: workspace
+        - name: source
           workspace: pipeline-ws
     - name: publish-deployable-task
       taskRef:
         name: toolchain-publish-deployable-mapping
       params:
         - name: deployable-type
-          value: "kubernetes_cluster"
+          value: "app"
         - name: deployable-region-id
           value: "ibm:yp:$(tasks.deploy-cf-app-task.results.region)"
         - name: deployable-guid
