@@ -5,7 +5,7 @@ metadata:
   name: cf-deploy-cf-app
 spec:
   params:
-    - name: cf-region
+    - name: region
       default: ""
     - name: cf-org
     - name: cf-space
@@ -21,17 +21,17 @@ spec:
     - name: continuous-delivery-context-secret
       description: name of the configmap containing the continuous delivery pipeline context secrets
       default: "secure-properties"
-    - name: cf-apikey-secret-key
+    - name: cloud-foundry-apikey-secret-key
       description: field in the secret that contains the api key used to connect to cloud foundry
       default: "cf-apikey"
     - name: pipeline-debug
       description: Pipeline debug mode
       default: "0"
   results:
-    - name: cf-region
+    - name: region
     - name: cf-target-url
     - name: cf-space-id
-    - name: cf-organization-id
+    - name: cf-org-id
     - name: cf-app-guid
   workspaces:
     - name: source
@@ -49,14 +49,14 @@ spec:
         - name: CF_SPACE
           value: $(params.cf-space)
         - name: CF_REGION
-          value: $(params.cf-region)
+          value: $(params.region)
         - name: IBM_CLOUD_API
           value: $(params.ibmcloud-api)
         - name: IBM_CLOUD_API_KEY
           valueFrom:
             secretKeyRef:
               name: $(params.continuous-delivery-context-secret)
-              key: $(params.cf-apikey-secret-key)
+              key: $(params.cloud-foundry-apikey-secret-key)
               optional: true
         - name: PIPELINE_DEBUG
           value: $(params.pipeline-debug)
@@ -98,9 +98,9 @@ spec:
         export CF_APP_GUID=$(ibmcloud cf app "$CF_APP" --guid | tail -n1)
 
         # Record task results
-        echo -n "$CF_REGION" > $(results.cf-region.path)
+        echo -n "$CF_REGION" > $(results.region.path)
         echo -n "$CF_TARGET_URL" > $(results.cf-target-url.path)
-        echo -n "$CF_ORGANIZATION_ID" > $(results.cf-organization-id.path)
+        echo -n "$CF_ORGANIZATION_ID" > $(results.cf-org-id.path)
         echo -n "$CF_SPACE_ID" > $(results.cf-space-id.path)
         echo -n "$CF_APP_GUID" > $(results.cf-app-guid.path)
       volumeMounts:
