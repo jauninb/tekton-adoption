@@ -12,7 +12,10 @@ spec:
         or
         - `kubernetes_cluster` for K8S deployment
     - name: deployable-region-id
-      description: fully qualified IBM Cloud Region where the deployable is located (such as ibm:yp:us-south)
+      description: |
+       IBM Cloud Region where the deployable is located.
+       A fully qualified id is expected (such as ibm:yp:us-south)
+       If not fully qualified, the ibmcloud production prefix is appended (ie 'ibm:yp:')
     - name: deployable-guid
       description: GUID of the deployable
     - name: deployable-cf-org-id
@@ -37,6 +40,18 @@ spec:
     - name: publish-deployable-mapping
       image: ibmcom/pipeline-base-image:2.6
       env:
+        - name: DEPLOYABLE_TYPE
+          value: $(params.deployable-type)
+        - name: DEPLOYABLE_GUID
+          value: $(params.deployable-guid)
+        - name: REGION_ID
+          value: $(params.deployable-region-id)
+        - name: RESOURCE_GROUP_ID
+          value: $(params.deployable-rg-id)
+        - name: CF_ORG_ID
+          value: $(params.deployable-cf-org-id)
+        - name: CF_SPACE_ID
+          value: $(params.deployable-cf-space-id)
         - name: PIPELINE_ID
           valueFrom:
             fieldRef:
@@ -74,54 +89,27 @@ spec:
         ibmcloud login -a $(params.ibmcloud-api) -r $TOOLCHAIN_REGION --apikey $IBM_CLOUD_API_KEY
         TOKEN=$(ibmcloud iam oauth-tokens --output JSON | jq -r '.iam_token')
 
-        # For a "app" - ie CF App
-        # 'deployable': {
-        #     'type': 'app',
-        #     'region_id': '${TARGET_REGION_ID}',
-        #     'deployable_guid': '6e3bc311-c83d-4cd1-a457-99d9a5f20f19',
-        #     'organization_guid': '8d34d127-d3db-43cd-808b-134b388f1646',
-        #     'space_guid': '5f9f2e5f-610c-4013-b34c-84c6bf4ccf30'
-        # },
-
-        # For a "kubernetes_cluster"
-        # "deployable": {
-        #   "type": "kubernetes_cluster",
-        #   "region_id": "ibm:yp:us-south",
-        #   "deployable_guid": "e49bfff2280240a8b11d2067b854fdef",
-        #   "container": {
-        #       "guid": "62cfaf6e56fb431f88f2a2116ada78f0",
-        #       "type": "resource_group_id"
-        #   }
-
-        #
-        # "toolchain": {
-        #   "toolchain_guid": "string",
-        #   "region_id": "ibm:ys1:us-south"
-        # },
-        # "source": {
-        #   "type": "service_instance",
-        #   "source_guid": "1bf412f6-a671-4b4d-a978-90da0e2d71e6"
-        # },
-
-        DEPLOYABLE_TYPE="$(params.deployable-type)"
-        DEPLOYABLE_GUID="$(params.deployable-guid)"
+        if [ $(echo "$REGION_ID" | grep -c ':' -) -ne 1 ]; then
+          # no ':' found so append ibmcloud production prefix to region id
+          export REGION_ID="ibm:yp:$REGION_ID"
+        fi
 
         echo "{}" | jq '.deployable={} | .toolchain={} | .source={}' > deployable_mapping.json
 
         cat deployable_mapping.json | \
-        jq --arg DEPL_TYPE "$DEPLOYABLE_TYPE" --arg REGION_ID "$(params.deployable-region-id)" \
+        jq --arg DEPL_TYPE "$DEPLOYABLE_TYPE" --arg REGION_ID "$REGION_ID" \
            --arg DEPL_GUID "$DEPLOYABLE_GUID" \
           '.deployable.type=$DEPL_TYPE | .deployable.region_id=$REGION_ID | .deployable.deployable_guid=$DEPL_GUID' \
           > tmp_deployable_mapping.json
         mv -f tmp_deployable_mapping.json deployable_mapping.json
 
         if [ "$DEPLOYABLE_TYPE" == "app" ]; then
-          cat deployable_mapping.json | jq --arg ORG_ID "$(params.deployable-cf-org-id)" \
-            --arg SPACE_ID "$(params.deployable-cf-space-id)" \
+          cat deployable_mapping.json | jq --arg ORG_ID "$CF_ORG_ID" \
+            --arg SPACE_ID "$CF_SPACE_ID" \
             '.deployable.organization_guid=$ORG_ID | .deployable.space_guid=$SPACE_ID' > tmp_deployable_mapping.json
           mv -f tmp_deployable_mapping.json deployable_mapping.json
         elif [ "$DEPLOYABLE_TYPE" == "kubernetes_cluster" ]; then
-          cat deployable_mapping.json | jq --arg RG_ID "$(params.deployable-rg-id)" \
+          cat deployable_mapping.json | jq --arg RG_ID "$RESOURCE_GROUP_ID" \
             '.deployable.container={} | .deployable.container.guid=$RG_ID | .deployable.container.type="resource_group_id"' \
             > tmp_deployable_mapping.json
           mv -f tmp_deployable_mapping.json deployable_mapping.json
