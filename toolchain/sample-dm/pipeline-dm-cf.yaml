@@ -30,6 +30,8 @@ spec:
           value: |
             # only dump list of cf apps
             ibmcloud cf apps
+        - name: pipeline-debug
+          value: $(params.pipeline-debug)
       workspaces:
         - name: source
           workspace: pipeline-ws
