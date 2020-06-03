@@ -52,9 +52,6 @@ spec:
         - name: cf-commands
           value: |
             #!/bin/bash
-            echo "========================="
-            env | sort
-            echo "========================="
             # Push app
             if ! cf app "$CF_APP"; then  
               cf push "$CF_APP"
@@ -79,10 +76,7 @@ spec:
             export CF_APP_NAME="$CF_APP"
             export APP_URL=http://$(cf app $CF_APP_NAME | grep -e urls: -e routes: | awk '{print $2}')
             # View logs
-            #cf logs "${CF_APP}" --recent
-            echo "========================="
-            env | sort
-            echo "========================="
+            cf logs "${CF_APP}" --recent
         - name: pipeline-debug
           value: $(params.pipeline-debug)
       workspaces:
