@@ -9,9 +9,15 @@ spec:
       description: the git repo
     - name: branch
       description: the branch for the git repo
+    - name: region
+      description: Name of the region to deploy the CF app to. Default to the toolchain region
+      default: ""
     - name: cf-org
+      description: Name of organization to deploy the CF app to
     - name: cf-space
+      description: Name of space to deploy the CF app to
     - name: cf-app
+      description: Name of the CF application to be deployed
     - name: pipeline-debug
       default: "0"
   workspaces:
@@ -43,6 +49,8 @@ spec:
           value: "secure-properties"
         - name: cloud-foundry-apikey-secret-key
           value: "toolchain-apikey"
+        - name: region
+          value: $(params.region)
         - name: cf-org
           value: $(params.cf-org)
         - name: cf-space
