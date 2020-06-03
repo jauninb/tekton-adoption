@@ -102,10 +102,10 @@ spec:
         export CF_SPACE_ID=$(jq -r '.cf.space.guid' /steps/ic_target.json)
         export CF_TARGET_URL=$(jq -r '.cf.api_endpoint' /steps/ic_target.json)
 
-        # Set the appropriate alias for cf to allow user to only provide cf commands (not ibmcloud cf commands)
+        # Set the appropriate alias for cf to allow user to only provide cf commands (not only ibmcloud cf commands)
         export CF_EXEC="ibmcloud cf"
 
-        # Remove the cf-post script as this script is only relevant for classic pipeline
+        # Remove the cf-post script content as this script is only relevant for classic pipeline
         echo "" > /opt/IBM/pipeline/bin/cf-post
 
         # Perform the cf-commands
