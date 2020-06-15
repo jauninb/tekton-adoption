@@ -26,6 +26,9 @@ spec:
     - name: pipeline-debug
       description: Pipeline debug mode
       default: "0"
+  results:
+    - name: exit-code
+      description: The exit-code of the tests script
   workspaces:
     - name: artifacts
       description: A workspace backing by a volume
@@ -84,9 +87,14 @@ spec:
         fi
 
         if /steps/tests-script.sh; then
+          echo -n $? > $(results.exit-code.path)
           echo "Tests executed successfully"
         else
-          echo $?
+          echo -n $? > $(results.exit-code.path)
+          echo "== results.exit-code.path =="
+          cat $(results.exit-code.path)
+          echo ""
+          echo "============================"
           # Failures in the tests execution
           if [ "$(params.fail-on-test-errors)" == "true" ]; then
             exit 1;
