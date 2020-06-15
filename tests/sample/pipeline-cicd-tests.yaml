@@ -1,0 +1,43 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Pipeline
+metadata:
+  name: cicd-tests
+spec:
+  params:
+    - name: repository
+      description: the git repo
+    - name: branch
+      description: the branch for the git repo
+  workspaces:
+    - name: pipeline-ws      
+  tasks:
+    - name: clone-task
+      taskRef:
+        name: git-clone-repo
+      params:
+        - name: continuous-delivery-context-secret
+          value: "secure-properties"
+        - name: ibmcloud-apikey-secret-key
+          value: "toolchain-apikey"
+        - name: repository
+          value: $(params.repository)
+        - name: branch
+          value: $(params.branch)
+      workspaces:
+        - name: output
+          workspace: pipeline-ws
+    - name: unit-tests-task
+      taskRef:
+        name: unit-tests-task
+      params:
+        - name: tests-script
+          value: |
+            env | sort
+            if [ -f ./tests/run-tests.sh ]; then
+              source ./tests/run-tests.sh
+            else
+              echo "Test runner script not found: ./tests/run-tests.sh"
+            fi
+      workspaces:
+        - name: artifacts
+          workspace: pipeline-ws
