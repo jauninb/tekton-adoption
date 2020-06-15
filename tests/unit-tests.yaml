@@ -103,10 +103,8 @@ spec:
           name: cd-config-volume
         - mountPath: /cd-config/secrets
           name: pipeline-secrets
-          optional: true
         - mountPath: /cd-config/properties
           name: pipeline-properties
-          optional: true
   volumes:
     - name: steps-volume
       emptyDir: {}
@@ -119,6 +117,8 @@ spec:
     - name: pipeline-properties
       configMap:
         name: $(params.pipeline-configmap)
+        optional: true
     - name: pipeline-secrets
       secret:
         secretName: $(params.pipeline-secret)
+        optional: true
