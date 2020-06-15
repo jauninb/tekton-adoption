@@ -2,7 +2,7 @@
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: unit-tests-task
+  name: tests-run-tests
 spec:
   params:
     - name: pipeline-secret
@@ -86,6 +86,7 @@ spec:
         if /steps/tests-script.sh; then
           echo "Tests executed successfully"
         else
+          echo $?
           # Failures in the tests execution
           if [ "$(params.fail-on-test-errors)" == "true" ]; then
             exit 1;
