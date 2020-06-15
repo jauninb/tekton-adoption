@@ -41,16 +41,17 @@ spec:
         - name: tests-script
           value: |
             #env | sort
-            ls -R -l /cd-config
-            cat /cd-config/toolchain.json
-            echo ""
-            cat /cd-config/properties/repository
-            echo ""
-            cat /cd-config/secrets/toolchain-apikey
-            echo ""
+            # ls -R -l /cd-config
+            # cat /cd-config/toolchain.json
+            # echo ""
+            # cat /cd-config/properties/repository
+            # echo ""
+            # cat /cd-config/secrets/toolchain-apikey
+            # echo ""
             if [ -f ./tests/run-tests.sh ]; then
               #source ./tests/run-tests.sh
               #exit $TEST_STATUS
+              echo "Doing an exit 4"
               exit 4
             else
               echo "Test runner script not found: ./tests/run-tests.sh"

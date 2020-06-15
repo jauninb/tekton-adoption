@@ -95,7 +95,7 @@ spec:
           if [ "$(params.fail-on-test-errors)" == "true" ]; then
             EXIT=$(cat $(results.exit-code.path))          
           else 
-            echo "Tests failed but Task is configured to not fail"
+            echo "Tests failed [exit code: $(cat $(results.exit-code.path))] but Task is configured to not fail"
           fi
         fi
       volumeMounts:
