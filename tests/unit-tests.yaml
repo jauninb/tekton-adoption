@@ -101,6 +101,12 @@ spec:
         - mountPath: /artifacts/_toolchain.json
           subPath: toolchain.json
           name: cd-config-volume
+        - mountPath: /cd-config/secrets
+          name: pipeline-secrets
+          optional: true
+        - mountPath: /cd-config/properties
+          name: pipeline-properties
+          optional: true
   volumes:
     - name: steps-volume
       emptyDir: {}

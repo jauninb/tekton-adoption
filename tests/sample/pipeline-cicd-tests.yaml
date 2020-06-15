@@ -40,7 +40,8 @@ spec:
           value: "na-configmap"
         - name: tests-script
           value: |
-            env | sort
+            #env | sort
+            ls -R -l /cd-config
             if [ -f ./tests/run-tests.sh ]; then
               #source ./tests/run-tests.sh
               #exit $TEST_STATUS
