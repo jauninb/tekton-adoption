@@ -36,6 +36,7 @@ spec:
             env | sort
             if [ -f ./tests/run-tests.sh ]; then
               source ./tests/run-tests.sh
+              exit $TEST_STATUS
             else
               echo "Test runner script not found: ./tests/run-tests.sh"
             fi
