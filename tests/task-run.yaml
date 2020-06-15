@@ -27,7 +27,7 @@ spec:
       description: Pipeline debug mode
       default: "0"
   results:
-    - name: exit-code
+    - name: tests-exit-code
       description: The exit-code of the tests script
   workspaces:
     - name: artifacts
@@ -87,17 +87,17 @@ spec:
         fi
 
         if /steps/tests-script.sh; then
-          echo -n $? > $(results.exit-code.path)
+          echo -n $? > $(results.tests-exit-code.path)
           echo "Tests executed successfully"
         else
-          echo -n $? > $(results.exit-code.path)
+          echo -n $? > $(results.tests-exit-code.path)
           # Failures in the tests execution
           if [ "$(params.fail-on-test-errors)" == "true" ]; then
-            echo "Tests failed [exit code: $(cat $(results.exit-code.path))]"
-            EXIT=$(cat $(results.exit-code.path))
+            echo "Tests failed [exit code: $(cat $(results.tests-exit-code.path))]"
+            EXIT=$(cat $(results.tests-exit-code.path))
             exit $EXIT
           else 
-            echo "Tests failed [exit code: $(cat $(results.exit-code.path))] but Task is configured to not fail"
+            echo "Tests failed [exit code: $(cat $(results.tests-exit-code.path))] but Task is configured to not fail"
           fi
         fi
       volumeMounts:
