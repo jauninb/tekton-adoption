@@ -31,7 +31,7 @@ spec:
           workspace: pipeline-ws
     - name: unit-tests-task
       taskRef:
-        name: unit-tests-task
+        name: tests-run
       runAfter: [clone-task]
       params:
         # - name: pipeline-secret
