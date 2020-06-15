@@ -93,7 +93,8 @@ spec:
           echo -n $? > $(results.exit-code.path)
           # Failures in the tests execution
           if [ "$(params.fail-on-test-errors)" == "true" ]; then
-            EXIT=$(cat $(results.exit-code.path))          
+            echo "Tests failed [exit code: $(cat $(results.exit-code.path))]"
+            EXIT=$(cat $(results.exit-code.path))
           else 
             echo "Tests failed [exit code: $(cat $(results.exit-code.path))] but Task is configured to not fail"
           fi

@@ -56,8 +56,8 @@ spec:
             else
               echo "Test runner script not found: ./tests/run-tests.sh"
             fi
-        - name: fail-on-test-errors
-          value: "false"
+        # - name: fail-on-test-errors
+        #   value: "false"
         - name: pipeline-debug
           value: $(params.pipeline-debug)
       workspaces:
