@@ -34,14 +34,15 @@ spec:
         name: unit-tests-task
       runAfter: [clone-task]
       params:
-        - name: pipeline-secret
-          value: "na-secret"
-        - name: pipeline-configmap
-          value: "na-configmap"
+        # - name: pipeline-secret
+        #   value: "na-secret"
+        # - name: pipeline-configmap
+        #   value: "na-configmap"
         - name: tests-script
           value: |
             #env | sort
             ls -R -l /cd-config
+            cat /cd-config/toolchain.json
             if [ -f ./tests/run-tests.sh ]; then
               #source ./tests/run-tests.sh
               #exit $TEST_STATUS
