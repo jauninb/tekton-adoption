@@ -39,6 +39,8 @@ spec:
       runAfter: [clone-task]
       taskRef:
         name: doi-publish-buildrecord
+      conditions:
+        - conditionRef: doi-enabled-in-toolchain
       params:
         - name: app-name
           value: $(params.app-name)
