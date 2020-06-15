@@ -34,6 +34,10 @@ spec:
         name: unit-tests-task
       runAfter: [clone-task]
       params:
+        - name: pipeline-secret
+          value: "na-secret"
+        - name: pipeline-configmap
+          value: "na-configmap"
         - name: tests-script
           value: |
             env | sort
