@@ -77,12 +77,20 @@ spec:
         printf "%s " '$(params.tests-script)' >> /steps/tests-script.sh
         chmod +x /steps/tests-script.sh
 
+        if [ $PIPELINE_DEBUG == 1 ]; then
+          echo "== cat /steps/tests-script.sh =="
+          cat /steps/tests-script.sh
+          echo "================================"
+        fi
+
         if /steps/tests-script.sh; then
           echo "Tests executed successfully"
         else
           # Failures in the tests execution
           if [ "$(params.fail-on-test-errors)" == "true" ]; then
             exit 1;
+          else 
+            echo "Tests failed but Task is configured to not fail"
           fi
         fi
       volumeMounts:
