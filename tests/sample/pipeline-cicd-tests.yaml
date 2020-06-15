@@ -43,7 +43,9 @@ spec:
             #env | sort
             ls -R -l /cd-config
             cat /cd-config/toolchain.json
+            echo ""
             cat /cd-config/properties/repository
+            echo ""
             cat /cd-config/secrets/toolchain-apikey
             if [ -f ./tests/run-tests.sh ]; then
               #source ./tests/run-tests.sh
