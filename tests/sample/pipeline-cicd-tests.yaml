@@ -47,6 +47,7 @@ spec:
             cat /cd-config/properties/repository
             echo ""
             cat /cd-config/secrets/toolchain-apikey
+            echo ""
             if [ -f ./tests/run-tests.sh ]; then
               #source ./tests/run-tests.sh
               #exit $TEST_STATUS
