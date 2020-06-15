@@ -29,6 +29,7 @@ spec:
     - name: unit-tests-task
       taskRef:
         name: unit-tests-task
+      runAfter: [clone-task]
       params:
         - name: tests-script
           value: |
