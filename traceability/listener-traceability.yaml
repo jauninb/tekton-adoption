@@ -45,7 +45,7 @@ spec:
         workspaces:
           - name: pipeline-ws
             persistentVolumeClaim:
-              claimName: pipelinerun-$(uid)-pvc
+              claimName: traceability-$(uid)-pvc
 ---
 apiVersion: tekton.dev/v1alpha1
 kind: TriggerBinding
