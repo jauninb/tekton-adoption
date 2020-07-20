@@ -1,0 +1,61 @@
+apiVersion: tekton.dev/v1alpha1
+kind: Pipeline
+metadata:
+  name: traceability
+spec:
+  params:
+    - name: repository
+      description: the git repo
+    - name: branch
+      description: the branch for the git repo
+    - name: cluster      
+    - name: pipeline-debug
+  workspaces:
+    - name: pipeline-ws      
+  tasks:
+    - name: clone-task
+      taskRef:
+        name: git-clone-repo
+      params:
+        - name: continuous-delivery-context-secret
+          value: "secure-properties"
+        - name: ibmcloud-apikey-secret-key
+          value: "toolchain-apikey"
+        - name: repository
+          value: $(params.repository)
+        - name: branch
+          value: $(params.branch)
+        - name: pipeline-debug
+          value: $(params.pipeline-debug)
+      workspaces:
+        - name: output
+          workspace: pipeline-ws
+    - name: fetch-cluster-config
+      taskRef: 
+        name: iks-fetch-config
+      params:
+        - name: kubernetes-service-apikey-secret-key
+          value: "toolchain-apikey"
+        - name: cluster-name
+          value: $(params.cluster)
+      workspaces:
+        - name: cluster-configuration
+          workspace: pipeline-ws
+    - name: fire-deployment-notification
+      taskRef:
+        name: toolchain-publish-deployable-mapping
+      runAfter: [clone-task, fetch-cluster-config]
+      params:
+        - name: deployable-type
+          value: "kubernetes_cluster"
+        - name: deployable-region-id
+          value: $(tasks.fetch-cluster-config.results.region)
+        - name: deployable-guid
+          value: $(tasks.fetch-cluster-config.results.cluster-id)
+        - name: deployable-rg-id
+          value: $(tasks.fetch-cluster-config.results.resource-group-id)
+        - name: pipeline-debug
+          value: $(params.pipeline-debug)
+      workspaces:
+        - name: artifacts
+          workspace: pipeline-ws
