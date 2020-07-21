@@ -8,6 +8,9 @@ spec:
       description: the git repo
     - name: branch
       description: the branch for the git repo
+    - name: revision
+      description: the git revision/commit for the git repo
+      default: ""
     - name: cluster      
     - name: pipeline-debug
   workspaces:
@@ -25,6 +28,8 @@ spec:
           value: $(params.repository)
         - name: branch
           value: $(params.branch)
+        - name: revision
+          value: $(params.revision)
         - name: pipeline-debug
           value: $(params.pipeline-debug)
       workspaces:
