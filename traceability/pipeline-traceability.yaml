@@ -56,7 +56,7 @@ spec:
           value: $(tasks.fetch-cluster-config.results.resource-group-id)
         - name: git-inputs
           value: |
-            $(tasks.clone.results.git-repository),$(tasks.clone.results.git-commit)
-            $(tasks.clone.results.git-repository),$(tasks.clone.results.git-commit)
+            $(tasks.clone.results.git-repository),$(tasks.clone.results.git-commit),$(tasks.clone.results.git-branch)
+            $(tasks.clone.results.git-repository),$(tasks.clone.results.git-commit),$(tasks.clone.results.git-branch)
         - name: pipeline-debug
           value: $(params.pipeline-debug)

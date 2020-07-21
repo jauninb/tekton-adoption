@@ -9,6 +9,9 @@ spec:
     - name: branch
       description: the branch for the git repo
       default: "master"
+    - name: revision
+      description: the git revision/commit for the git repo
+      default: ""
     - name: cluster
       default: "mycluster"
     - name: pipeline-debug
@@ -38,6 +41,8 @@ spec:
             value: $(params.repository)
           - name: branch
             value: $(params.branch)
+          - name: revision
+            value: $(params.revision)
           - name: cluster
             value: $(params.cluster)
           - name: pipeline-debug
@@ -47,20 +52,96 @@ spec:
             persistentVolumeClaim:
               claimName: traceability-$(uid)-pvc
 ---
-apiVersion: tekton.dev/v1alpha1
+apiVersion: tekton.dev/v1beta1
 kind: TriggerBinding
 metadata:
-  name: manual
+  name: trigger-binding-manual
 spec:
   params:
+    - name: repository
+      value: "$params.repository"
+    - name: branch
+      value: "$params.branch"
 ---
-apiVersion: tekton.dev/v1alpha1
+apiVersion: tekton.dev/v1beta1
 kind: EventListener
 metadata:
   name: manual-run
 spec:
   triggers:
-    - bindings:
-        - name: manual
+    - binding:
+        name: trigger-binding-manual
+      template:
+        name: traceability
+---
+apiVersion: tekton.dev/v1beta1
+kind: TriggerBinding
+metadata:
+  name: github-commit
+spec:
+  params:
+    - name: repository
+      value: "$(event.repository.url)"
+    - name: branch
+      value: "$(event.ref)"
+    - name: revision
+      value: "$(event.head_commit.id)"
+---
+apiVersion: tekton.dev/v1beta1
+kind: EventListener
+metadata:
+  name: github-commit
+spec:
+  triggers:
+    - binding:
+        name: github-commit
+      template:
+        name: traceability
+---
+apiVersion: tekton.dev/v1beta1
+kind: TriggerBinding
+metadata:
+  name: grit-or-gitlab-commit
+spec:
+  params:
+    - name: repository
+      value: "$(event.repository.git_http_url)"
+    - name: branch
+      value: "$(event.ref)"
+    - name: revision
+      value: "$(event.checkout_sha)"
+---
+apiVersion: tekton.dev/v1beta1
+kind: EventListener
+metadata:
+  name: grit-or-gitlab-commit
+spec:
+  triggers:
+    - binding:
+        name: grit-or-gitlab-commit
+      template:
+        name: traceability
+---
+apiVersion: tekton.dev/v1beta1
+kind: TriggerBinding
+metadata:
+  name: bitbucket-commit
+spec:
+  params:
+    - name: repository
+      value: "$(event.repository.links.html.href)"
+    - name: revision
+      value: "$(event.push.changes[0].new.target.hash)"
+    - name: branch
+      value: "$(event.push.changes[0].new.name)"
+---
+apiVersion: tekton.dev/v1beta1
+kind: EventListener
+metadata:
+  name: bitbucket-commit
+spec:
+  triggers:
+    - binding:
+        name: bitbucket-commit
       template:
         name: traceability
