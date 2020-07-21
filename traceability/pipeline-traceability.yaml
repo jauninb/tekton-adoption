@@ -111,8 +111,12 @@ spec:
           value: $(tasks.deploy-cf-app.results.cf-app-guid)
         - name: deployable-cf-org-id
           value: $(tasks.deploy-cf-app.results.cf-org-id)
+        - name: deployable-cf-org-name
+          value: $(params.cf-org)
         - name: deployable-cf-space-id
           value: $(tasks.deploy-cf-app.results.cf-space-id)
+        - name: deployable-cf-space-name
+          value: $(params.cf-space)
         - name: environment-label
           value: "deployed app $(params.cf-app)"
         - name: git-inputs
