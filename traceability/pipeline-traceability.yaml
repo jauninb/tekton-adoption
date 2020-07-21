@@ -59,6 +59,8 @@ spec:
           value: $(tasks.fetch-cluster-config.results.cluster-id)
         - name: deployable-rg-id
           value: $(tasks.fetch-cluster-config.results.resource-group-id)
+        - name: environment-label
+          value: "k8s $(params.cluster) - namespace: TBD"
         - name: git-inputs
           value: |
             $(tasks.clone.results.git-repository),$(tasks.clone.results.git-commit),$(tasks.clone.results.git-branch)
