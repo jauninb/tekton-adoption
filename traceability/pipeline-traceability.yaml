@@ -11,7 +11,12 @@ spec:
     - name: revision
       description: the git revision/commit for the git repo
       default: ""
-    - name: cluster      
+    - name: cluster-region
+    - name: cluster-name
+    - name: cf-region
+    - name: cf-org
+    - name: cf-space
+    - name: cf-app
     - name: pipeline-debug
   workspaces:
     - name: pipeline-ws      
@@ -41,12 +46,14 @@ spec:
       params:
         - name: kubernetes-service-apikey-secret-key
           value: "toolchain-apikey"
+        - name: cluster-region
+          value: $(params.cluster-region)
         - name: cluster-name
-          value: $(params.cluster)
+          value: $(params.cluster-name)
       workspaces:
         - name: cluster-configuration
           workspace: pipeline-ws
-    - name: fire-deployment-notification
+    - name: fire-k8s-deployment-notification
       taskRef:
         name: toolchain-publish-deployable-mapping
       runAfter: [clone, fetch-cluster-config]
@@ -60,7 +67,54 @@ spec:
         - name: deployable-rg-id
           value: $(tasks.fetch-cluster-config.results.resource-group-id)
         - name: environment-label
-          value: "k8s $(params.cluster) - namespace: TBD"
+          value: "k8s $(params.cluster-name) - namespace: TBD"
+        - name: git-inputs
+          value: |
+            $(tasks.clone.results.git-repository),$(tasks.clone.results.git-commit),$(tasks.clone.results.git-branch)
+            $(tasks.clone.results.git-repository),$(tasks.clone.results.git-commit),$(tasks.clone.results.git-branch)
+        - name: pipeline-debug
+          value: $(params.pipeline-debug)
+    - name: deploy-cf-app
+      runAfter: [clone]
+      taskRef:
+        name: cf-deploy-app
+      params:
+        - name: continuous-delivery-context-secret
+          value: "secure-properties"
+        - name: cloud-foundry-apikey-secret-key
+          value: "toolchain-apikey"
+        - name: region
+          value: $(params.cf-region)
+        - name: cf-org
+          value: $(params.cf-org)
+        - name: cf-space
+          value: $(params.cf-space)
+        - name: cf-app
+          value: $(params.cf-app)
+        - name: cf-commands
+          value: |
+            #!/bin/bash
+        - name: pipeline-debug
+          value: $(params.pipeline-debug)
+      workspaces:
+        - name: source
+          workspace: pipeline-ws
+    - name: fire-cf-app-deployment-notification
+      taskRef:
+        name: toolchain-publish-deployable-mapping
+      params:
+        - name: deployable-type
+          value: "app"
+        - name: deployable-region-id
+          value: $(tasks.deploy-cf-app.results.region)
+        - name: deployable-guid
+          value: $(tasks.deploy-cf-app.results.cf-app-guid)
+        - name: deployable-cf-org-id
+          value: $(tasks.deploy-cf-app.results.cf-org-id)
+        - name: deployable-cf-space-id
+          value: $(tasks.deploy-cf-app.results.cf-space-id)
+        - name: environment-label
+          value: "deployed app $(params.cf-app)"
         - name: git-inputs
           value: |
             $(tasks.clone.results.git-repository),$(tasks.clone.results.git-commit),$(tasks.clone.results.git-branch)
